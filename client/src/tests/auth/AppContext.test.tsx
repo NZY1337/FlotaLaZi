@@ -157,7 +157,7 @@ describe("AppProvider", () => {
         });
     });
 
-    it("logout calls signOut", async () => {
+    it("logout signs out only on this device", async () => {
         mockAuth.signOut.mockResolvedValue({});
         const { result } = renderHook(() => useAppContext(), { wrapper });
 
@@ -165,7 +165,7 @@ describe("AppProvider", () => {
             await result.current.logout();
         });
 
-        expect(mockAuth.signOut).toHaveBeenCalled();
+        expect(mockAuth.signOut).toHaveBeenCalledWith({ scope: "local" });
     });
 
     it("updates session and sessionLoaded when the Supabase auth listener fires", async () => {

@@ -25,5 +25,7 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./src/test-setup.ts"],
+    // lib/supabase creates its client at import; tests never reach it over the network.
+    env: { VITE_SUPABASE_URL: "http://localhost:54321", VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY: "test" },
   },
 });
