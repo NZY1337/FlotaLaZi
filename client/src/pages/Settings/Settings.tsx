@@ -3,6 +3,7 @@ import PageMeta from '../../components/common/PageMeta';
 import Alert from '../../components/ui/alert/Alert';
 import { ActionButton, Card, ErrorText, PageHeader, TextField } from '../../components/fleet/ui';
 import { useLegacyImport, useSettings } from '../../hooks/useSettings';
+import TestRemindersCard from '../../components/fleet/TestRemindersCard';
 import type { ImportResult } from '../../services/legacyImport';
 
 export default function Settings() {
@@ -81,6 +82,8 @@ export default function Settings() {
                         <ActionButton type="submit" disabled={update.isPending}>{update.isPending ? 'Se salvează…' : '💾 Salvează setările'}</ActionButton>
                     </form>
                 </Card>
+
+                <TestRemindersCard />
 
                 <Card title="⬆️ Import din aplicația veche (Flota Mea)">
                     <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">

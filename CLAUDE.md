@@ -5,9 +5,9 @@ implementing anything. When in doubt, prefer whatever this file says over a
 "cleaner"-looking alternative.
 
 > History: this codebase started as Streamloop (an n8n automation-business
-> portal). Streamloop lives on `main`; EuroTrack is built on `feat/eurotrack`.
+> portal) and became EuroTrack in PR #4 (repo now `NZY1337/FlotaMea`).
 > Auth, the UI shell, notifications and email were kept; the commerce/n8n
-> domain was removed.
+> domain was removed. Streamloop's last state is commit `de43723`.
 
 ## 1. Product overview
 
@@ -217,6 +217,10 @@ their documents.
   `alertDays`, 7, 1, 0 or −1, at most once per day (`lastAlertedOn`). Oil
   alerts at most once every 7 days while yellow/red. One digest per owner per
   run: one in-app notification per item + one email.
+- `POST /reminders/test` ("Trimite-mi alertele acum" in Setări) sends the
+  caller everything currently red/yellow — no threshold days, emails even
+  with `emailAlerts` off, reports SMTP errors in its result, never touches
+  `lastAlertedOn` / `lastOilAlertOn`, and is limited to once a minute.
 
 ## 8. API conventions
 
@@ -234,6 +238,7 @@ POST  /transactions            PATCH/DELETE /transactions/:id
 GET   /transactions/summary?from&to&vehicleId
 GET   /dashboard
 POST  /import/legacy            (body = legacy JSON backup)
+POST  /reminders/test           (no body; see §7)
 GET   /notifications …          (kept)
 GET   /user/me                  (kept)
 ```

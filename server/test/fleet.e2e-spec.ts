@@ -183,6 +183,37 @@ describeDb('EuroTrack API (e2e)', () => {
         expect(sendText).toHaveBeenCalledTimes(1);
     });
 
+    it('sends a test digest of everything red/yellow on demand, without touching the daily bookkeeping', async () => {
+        sendText.mockClear();
+        const res = await as(A).post('/reminders/test').expect(200);
+        // Unlike the scheduled run, the test includes the licence expired 3 days ago.
+        expect(res.body.alerts).toEqual([
+            expect.stringMatching(/^Licență Transport — Firmă: a expirat \(3 zile\)/),
+            expect.stringMatching(/^ITP — NT 08 RGT: expiră în 7 zile/),
+        ]);
+        expect(res.body.email).toEqual({ sent: true, to: '1111@test.ro', error: null });
+        expect(sendText).toHaveBeenCalledTimes(1);
+
+        // Rate-limited per owner.
+        await as(A).post('/reminders/test').expect(429);
+        // Bookkeeping untouched: the daily run for today was already done and stays done.
+        const reminders = app.get(RemindersService);
+        expect(await reminders.run(todayYmd())).toBe(0);
+        // Another owner with nothing due gets an empty result and no email.
+        expect((await as(B).post('/reminders/test').expect(200)).body).toEqual({ alerts: [], email: { sent: false, to: null, error: null } });
+        expect(sendText).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports an SMTP failure in the test result instead of failing', async () => {
+        sendText.mockRejectedValueOnce(new Error('Invalid login: 535 BadCredentials'));
+        const reminders = app.get(RemindersService);
+        // Reset the per-owner cooldown so this second test can run immediately.
+        (reminders as unknown as { lastTest: Map<string, number> }).lastTest.clear();
+        const res = await reminders.sendTest(A, todayYmd());
+        expect(res.email).toEqual({ sent: false, to: '1111@test.ro', error: 'Invalid login: 535 BadCredentials' });
+        expect(res.alerts).toHaveLength(2);
+    });
+
     it('imports a legacy backup into an empty account only', async () => {
         const backup = {
             settings: { eurRate: 4.98 },
