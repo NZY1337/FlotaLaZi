@@ -13,7 +13,7 @@ const ProtectedRoute = () => {
         );
     }
 
-    return session ? <Outlet /> : <Navigate to="/" replace state={{ from: location }} />;
+    return session ? <Outlet /> : <Navigate to="/signin" replace state={{ from: location }} />;
 
 };
 
