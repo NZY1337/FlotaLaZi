@@ -166,13 +166,14 @@ export function TextField({ label, value, onChange, type = 'text', required, pla
  * with parseNumberInput, shows how it read the number under the field, and
  * blocks the form (the browser's own message) while it is unclear or too small.
  */
-export function NumberField({ label, value, onChange, decimals = 0, unit, min, required, placeholder, hint }: {
+export function NumberField({ label, value, onChange, decimals = 0, unit, min, max, required, placeholder, hint }: {
     label: string;
     value: string;
     onChange: (value: string) => void;
     decimals?: number;
     unit?: string;
     min?: number;
+    max?: number;
     required?: boolean;
     placeholder?: string;
     hint?: string;
@@ -184,7 +185,8 @@ export function NumberField({ label, value, onChange, decimals = 0, unit, min, r
     const problem = !filled ? ''
         : parsed === null
             ? (decimals > 0 ? 'Sumă neclară. Scrie de exemplu 1500, 1.500 sau 1.500,50.' : 'Număr neclar. Scrie de exemplu 450000 sau 450.000.')
-            : min !== undefined && parsed < min ? `Minimum ${formatNumberInput(min, decimals)}.` : '';
+            : min !== undefined && parsed < min ? `Minimum ${formatNumberInput(min, decimals)}.`
+            : max !== undefined && parsed > max ? `Maximum ${formatNumberInput(max, decimals)}.` : '';
     useEffect(() => { ref.current?.setCustomValidity(problem); }, [problem]);
     const reading = filled && parsed !== null ? `= ${formatNumberInput(parsed, decimals)}${unit ? ` ${unit}` : ''}` : null;
     return (

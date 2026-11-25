@@ -154,7 +154,11 @@ and logins for drivers/accountants are deliberately **not** built: add them
 only when a real firm needs more than one login, then migrate `ownerId` →
 `companyId`.
 
-All money is an integer in minor units (bani / cents). Dates without time
+All money is an integer in minor units (bani / cents), in Postgres `int`
+columns: one amount is at most 1,000,000 (RON or EUR) and the EUR rate at most
+20, so the largest amountRon still fits (`MAX_AMOUNT` / `MAX_EUR_RATE` in
+`fleet/money.ts`; raising them needs a `bigint` migration). EUR → RON rounds
+half up with integer math, never floats. Dates without time
 (expiry, transaction date, oil date) are Postgres `date` columns, handled as
 `YYYY-MM-DD` strings; "today" is always computed in `Europe/Bucharest`.
 

@@ -62,7 +62,7 @@ export default function Settings() {
             <div className="grid gap-4 lg:grid-cols-2">
                 <Card title="⚙️ Setări generale">
                     <form className="flex flex-col gap-4" onSubmit={(e) => { e.preventDefault(); save(); }}>
-                        <TextField label="Curs valutar (1 EUR = ? RON)" type="number" step="0.0001" min={0.0001} value={form.eurRate} required
+                        <TextField label="Curs valutar (1 EUR = ? RON)" type="number" step="0.0001" min={0.0001} max={20} value={form.eurRate} required
                             onChange={(v) => setForm((f) => ({ ...f, eurRate: v }))}
                             hint="Folosit pentru tranzacțiile noi. Cele vechi își păstrează cursul din ziua înregistrării." />
                         <NumberField label="Alertă schimb ulei (cu câți km înainte)" unit="km" min={0} value={form.oilAlertKm} required

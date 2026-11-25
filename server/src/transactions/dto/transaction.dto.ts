@@ -2,7 +2,7 @@ import { Transform } from 'class-transformer';
 import { IsEnum, IsIn, IsNumber, IsOptional, IsString, IsUUID, Length, Max, MaxLength, Min, ValidateIf } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
 import { TransactionType } from '../entities/transaction.entity';
-import { CURRENCIES, type Currency } from '../../fleet/money';
+import { CURRENCIES, MAX_AMOUNT, type Currency } from '../../fleet/money';
 import { IsYmd } from '../../fleet/is-ymd.validator';
 
 const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value);
@@ -17,7 +17,7 @@ export class CreateTransactionDto {
     // Major units (e.g. 1250.50). The backend converts to minor units.
     @IsNumber({ maxDecimalPlaces: 2 })
     @Min(0.01)
-    @Max(100_000_000)
+    @Max(MAX_AMOUNT)
     amount: number;
 
     @IsIn(CURRENCIES)

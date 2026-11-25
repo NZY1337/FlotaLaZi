@@ -81,7 +81,7 @@ export default function TransactionFormModal({ isOpen, onClose, type = 'EXPENSE'
                     options={[{ value: 'INCOME', label: '🟢 Încasare' }, { value: 'EXPENSE', label: '🔴 Cheltuială' }]} />
             )}
             <Row>
-                <NumberField label="Sumă" decimals={2} unit={currency === 'EUR' ? '€' : 'lei'} min={0.01} value={amount} onChange={setAmount} required placeholder="ex: 1.500,00" />
+                <NumberField label="Sumă" decimals={2} unit={currency === 'EUR' ? '€' : 'lei'} min={0.01} max={1_000_000} value={amount} onChange={setAmount} required placeholder="ex: 1.500,00" />
                 <SelectField label="Monedă" value={currency} onChange={(v) => setCurrency(v as Currency)} options={[{ value: 'RON', label: 'RON' }, { value: 'EUR', label: 'EUR' }]} />
             </Row>
             <Row>
