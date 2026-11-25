@@ -44,6 +44,10 @@ import { LegacyImportModule } from './legacy-import/legacy-import.module';
             entities: [UserEntity, Notification, FleetSettings, Vehicle, Driver, FleetDocument, Transaction],
             // Schema changes go through migrations only (npm run migration:run).
             synchronize: false,
+            // Supabase's session pooler allows 15 clients per project, shared by
+            // every server pointed at it (Railway + a dev laptop). pg's default
+            // pool of 10 each overflows it; 5 is plenty for this app's load.
+            extra: { max: Number(process.env.DB_POOL_MAX) || 5 },
         }),
         SupabaseModule,
         NodemailerModule,
