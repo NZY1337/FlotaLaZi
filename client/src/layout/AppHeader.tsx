@@ -87,11 +87,11 @@ const AppHeader: React.FC = () => {
                         <div className="flex items-center gap-4">
                             <div className="w-10 h-10 bg-brand-500 flex items-center justify-center">
                                 <span className="text-white font-black text-2xl">
-                                    S
+                                    E
                                 </span>
                             </div>
                             <span className="font-black text-2xl tracking-tight text-black dark:text-white uppercase">
-                                Streamloop
+                                EuroTrack
                             </span>
                         </div>
                     </Link>

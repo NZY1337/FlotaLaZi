@@ -6,8 +6,8 @@ export default function ForgotPassword() {
     return (
         <>
             <PageMeta
-                title="Forgot Password | Streamloop"
-                description="Request a password reset link for your Streamloop account"
+                title="Forgot Password | EuroTrack"
+                description="Request a password reset link for your EuroTrack account"
             />
             <AuthLayout>
                 <ForgotPasswordForm />

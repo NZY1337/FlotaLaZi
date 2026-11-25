@@ -22,7 +22,7 @@ Un fișier cu SQL care schimbă **structura** bazei (tabele, coloane). Stă în
 - **Rulează o singură dată pe fiecare bază.** TypeORM notează în tabelul
   `migrations` din baza de date care au rulat deja și le sare.
 - **Are două părți:** `up()` aplică schimbarea, `down()` o desface.
-- **Schimbă structura, nu datele.** Serviciile (rândurile din `services`) le
+- **Schimbă structura, nu datele.** Rândurile (vehicule, acte etc.) le
   inserezi din SQL Editor, nu prin migrații.
 
 ## Regula de aur
@@ -32,14 +32,14 @@ entitate, baza rămâne neschimbată până rulezi tu `migration:run`.
 
 ## Ce faci când schimbi o entitate
 
-Exemplu: vrei un câmp nou `imageUrl` pe `Service`.
+Exemplu: vrei un câmp nou `color` pe `Vehicle`.
 
-1. **Modifici entitatea** (`src/catalog/entities/service.entity.ts`).
+1. **Modifici entitatea** (`src/vehicles/entities/vehicle.entity.ts`).
 2. **Generezi fișierul:**
    ```bash
-   npm run migration:generate -- src/migrations/AddServiceImageUrl
+   npm run migration:generate -- src/migrations/AddVehicleColor
    ```
-   Apare automat `src/migrations/<număr>-AddServiceImageUrl.ts`. Conține doar
+   Apare automat `src/migrations/<număr>-AddVehicleColor.ts`. Conține doar
    diferența dintre cod și baza reală. **Baza nu se atinge încă.**
    Numele: scurt, în PascalCase, spune ce se schimbă.
 3. **Deschizi fișierul și citești `up()`.** Vezi secțiunea „La ce să fii atent".

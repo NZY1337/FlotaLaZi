@@ -6,8 +6,8 @@ export default function ResetPassword() {
     return (
         <>
             <PageMeta
-                title="Reset Password | Streamloop"
-                description="Set a new password for your Streamloop account"
+                title="Reset Password | EuroTrack"
+                description="Set a new password for your EuroTrack account"
             />
             <AuthLayout>
                 <ResetPasswordForm />

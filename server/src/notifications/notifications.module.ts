@@ -9,6 +9,7 @@ import { Notification } from './entities/notification.entity';
     imports: [TypeOrmModule.forFeature([Notification])],
     controllers: [NotificationsController],
     providers: [NotificationsService, NotificationsListener],
+    exports: [NotificationsService],
 })
 
 export class NotificationsModule { }
