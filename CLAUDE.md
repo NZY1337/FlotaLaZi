@@ -294,6 +294,8 @@ Pricing to test: ~5–8 € per truck per month, first 2 trucks free.
   Data API; no policies needed — the backend bypasses RLS).
 - `DATABASE_URL`: local Postgres in dev; Supabase session pooler / direct
   connection (port 5432) in production — never the 6543 transaction pooler.
+  The session pooler allows 15 clients per project, shared by every server
+  using it, so each server's pool is capped at 5 (`DB_POOL_MAX` overrides).
 - EuroTrack needs its **own** Supabase project — never point it at
   Streamloop's database.
 - Env (server): `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
