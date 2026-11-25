@@ -27,7 +27,7 @@ export default function Home() {
 
     return (
         <>
-            <PageMeta title="Panou - EuroTrack" description="Alertele și situația flotei tale." />
+            <PageMeta title="Panou - FlotaLaZi" description="Alertele și situația flotei tale." />
             <PageHeader
                 title="Panou"
                 subtitle="Ce expiră, ce revizii urmează și cât ai câștigat luna asta."

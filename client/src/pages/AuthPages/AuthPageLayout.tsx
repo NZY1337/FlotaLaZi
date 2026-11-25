@@ -19,9 +19,9 @@ export default function AuthLayout({
                             <Link to="/" className="block">
                                 <div className="flex items-center gap-4">
                                     <div className="w-25 h-25 bg-black flex items-center justify-center">
-                                        <span role="img" aria-label="EuroTrack" className="text-6xl">🚛</span>
+                                        <span role="img" aria-label="FlotaLaZi" className="text-6xl">🚛</span>
                                     </div>
-                                    <span className="font-black text-7xl tracking-tighter text-white uppercase italic">EuroTrack</span>
+                                    <span className="font-black text-7xl tracking-tighter text-white italic">FlotaLaZi</span>
                                 </div>
                             </Link>
                             <p className="text-white/70 text-sm tracking-wide text-left w-full">

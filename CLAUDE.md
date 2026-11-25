@@ -1,17 +1,18 @@
-# CLAUDE.md — EuroTrack (fleet admin for small transport firms)
+# CLAUDE.md — FlotaLaZi (fleet admin for small transport firms)
 
 This file is the source of truth for how this project is built. Read it before
 implementing anything. When in doubt, prefer whatever this file says over a
 "cleaner"-looking alternative.
 
 > History: this codebase started as Streamloop (an n8n automation-business
-> portal) and became EuroTrack in PR #4 (repo now `NZY1337/FlotaMea`).
+> portal), became EuroTrack in PR #4 (repo now `NZY1337/FlotaMea`) and was
+> renamed **FlotaLaZi** (domain `flotalazi.ro`) in PR #13.
 > Auth, the UI shell, notifications and email were kept; the commerce/n8n
 > domain was removed. Streamloop's last state is commit `de43723`.
 
 ## 1. Product overview
 
-EuroTrack is the **administrative assistant of a small Romanian road-transport
+FlotaLaZi is the **administrative assistant of a small Romanian road-transport
 firm (1–10 trucks, no dispatcher)**. It answers two questions without the
 owner having to remember anything:
 
@@ -296,7 +297,7 @@ Pricing to test: ~5–8 € per truck per month, first 2 trucks free.
   connection (port 5432) in production — never the 6543 transaction pooler.
   The session pooler allows 15 clients per project, shared by every server
   using it, so each server's pool is capped at 5 (`DB_POOL_MAX` overrides).
-- EuroTrack needs its **own** Supabase project — never point it at
+- FlotaLaZi needs its **own** Supabase project — never point it at
   Streamloop's database.
 - Env (server): `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
   `RESEND_API_KEY` + `MAIL_FROM` (production email; `MAIL_FROM` must be on

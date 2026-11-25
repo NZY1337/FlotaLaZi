@@ -23,7 +23,7 @@ export default function Documents() {
 
     return (
         <>
-            <PageMeta title="Acte - EuroTrack" description="Acte și date de expirare." />
+            <PageMeta title="Acte - FlotaLaZi" description="Acte și date de expirare." />
             <PageHeader
                 title="Acte & expirări"
                 subtitle="ITP, RCA, rovinietă, tahograf, copie conformă, licențe și actele șoferilor."

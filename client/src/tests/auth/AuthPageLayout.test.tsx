@@ -17,11 +17,11 @@ const renderLayout = (children: React.ReactNode = <div>child content</div>) =>
     );
 
 describe("AuthPageLayout", () => {
-    it("renders the EuroTrack wordmark and icon", () => {
+    it("renders the FlotaLaZi wordmark and icon", () => {
         renderLayout();
 
-        expect(screen.getByText("EuroTrack")).toBeInTheDocument();
-        expect(screen.getByRole("img", { name: "EuroTrack" })).toBeInTheDocument();
+        expect(screen.getByText("FlotaLaZi")).toBeInTheDocument();
+        expect(screen.getByRole("img", { name: "FlotaLaZi" })).toBeInTheDocument();
     });
 
     it("renders the tagline", () => {

@@ -30,8 +30,8 @@ export function notificationType(a: Alert): 'warning' | 'error' {
 
 export function emailDigest(name: string, alerts: Alert[], appUrl: string): { subject: string; text: string } {
     const subject = alerts.length === 1
-        ? `EuroTrack: ${alertLine(alerts[0])}`
-        : `EuroTrack: ${alerts.length} acte / revizii necesită atenție`;
+        ? `FlotaLaZi: ${alertLine(alerts[0])}`
+        : `FlotaLaZi: ${alerts.length} acte / revizii necesită atenție`;
     const text = [
         `Bună${name ? `, ${name}` : ''},`,
         '',
@@ -41,7 +41,7 @@ export function emailDigest(name: string, alerts: Alert[], appUrl: string): { su
         '',
         `Vezi detalii: ${appUrl}/dashboard`,
         '',
-        '— EuroTrack',
+        '— FlotaLaZi',
     ].join('\n');
     return { subject, text };
 }

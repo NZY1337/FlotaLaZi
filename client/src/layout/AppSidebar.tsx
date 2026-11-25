@@ -236,11 +236,11 @@ const AppSidebar: React.FC = () => {
                                     <div className="flex items-center gap-4">
                                         <div className="w-10 h-10 bg-brand-500 flex items-center justify-center">
                                             <span className="text-white font-black text-2xl">
-                                                E
+                                                F
                                             </span>
                                         </div>
-                                        <span className="font-black text-2xl tracking-tight text-black dark:text-white uppercase">
-                                            EuroTrack
+                                        <span className="font-black text-2xl tracking-tight text-black dark:text-white">
+                                            FlotaLaZi
                                         </span>
                                     </div>
                                 </Link>
@@ -251,7 +251,7 @@ const AppSidebar: React.FC = () => {
                             <Link to="/" className="block mb-4">
                                 <div className="w-10 h-10 bg-brand-500 flex items-center justify-center">
                                     <span className="text-white font-black text-2xl">
-                                        E
+                                        F
                                     </span>
                                 </div>
                             </Link>

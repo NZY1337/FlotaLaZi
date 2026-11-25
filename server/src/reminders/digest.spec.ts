@@ -24,10 +24,10 @@ describe('reminder digest', () => {
         const { subject, text } = emailDigest('Ion', [
             { kind: 'document', type: 'ITP', subject: 'NT 08 RGT', expiresOn: '2026-12-02', daysLeft: 7 },
             { kind: 'oil', plate: 'NT 09 ABC', kmLeft: 900, daysLeft: null },
-        ], 'https://app.eurotrack.ro');
-        expect(subject).toBe('EuroTrack: 2 acte / revizii necesită atenție');
+        ], 'https://flotalazi.ro');
+        expect(subject).toBe('FlotaLaZi: 2 acte / revizii necesită atenție');
         expect(text).toContain('Bună, Ion,');
         expect(text).toContain('• ITP — NT 08 RGT: expiră în 7 zile (02.12.2026)');
-        expect(text).toContain('https://app.eurotrack.ro/dashboard');
+        expect(text).toContain('https://flotalazi.ro/dashboard');
     });
 });
