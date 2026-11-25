@@ -1,5 +1,5 @@
 import { addDays, addMonths, daysBetween, isYmd, monthRange, todayYmd } from './dates';
-import { decimalToMinor, toRonMinor } from './money';
+import { decimalToMinor, MAX_AMOUNT, MAX_EUR_RATE, toRonMinor } from './money';
 import { expiryStatus, oilStatus, shouldAlertDocument, shouldAlertOil } from './status';
 
 describe('dates', () => {
@@ -45,6 +45,18 @@ describe('money', () => {
         expect(toRonMinor(10000, 'EUR', 4.9765)).toBe(49765);
         expect(toRonMinor(333, 'EUR', 4.98)).toBe(1658);
         expect(toRonMinor(12345, 'RON', 4.98)).toBe(12345);
+    });
+
+    it('rounds exact halves up, where float math would round them down', () => {
+        // 130.00 EUR × 4.9765 = 646.945 RON exactly; as floats it is 64694.49999…
+        expect(toRonMinor(13000, 'EUR', 4.9765)).toBe(64695);
+        expect(toRonMinor(3000, 'EUR', 4.9815)).toBe(14945);
+        expect(toRonMinor(1, 'EUR', 4.5)).toBe(5);       // 4.5 bani → 5
+        expect(toRonMinor(1, 'EUR', 4.4999)).toBe(4);
+    });
+
+    it('keeps the largest allowed amount inside a Postgres int', () => {
+        expect(toRonMinor(MAX_AMOUNT * 100, 'EUR', MAX_EUR_RATE)).toBeLessThanOrEqual(2_147_483_647);
     });
 
     it('converts decimals to minor units without float noise', () => {

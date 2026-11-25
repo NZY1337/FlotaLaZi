@@ -1,10 +1,11 @@
+import { MAX_EUR_RATE } from '../../fleet/money';
 import { IsBoolean, IsInt, IsNumber, IsOptional, Max, Min } from 'class-validator';
 
 export class UpdateSettingsDto {
     @IsOptional()
     @IsNumber({ maxDecimalPlaces: 4 })
     @Min(0.0001)
-    @Max(100)
+    @Max(MAX_EUR_RATE)
     eurRate?: number;
 
     @IsOptional()

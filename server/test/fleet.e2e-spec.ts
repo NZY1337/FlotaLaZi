@@ -247,6 +247,104 @@ describeDb('FlotaLaZi API (e2e)', () => {
         await as(A).post('/import/legacy', backup).expect(409);
     });
 
+    it('totals match an independent recount: 120 random transactions, two EUR rates', async () => {
+        // A separate owner so the other tests' data does not mix in.
+        const C = '55555555-5555-4555-8555-555555555555';
+        const today = todayYmd();
+        const firstOfMonth = `${today.slice(0, 8)}01`;
+        const dates = [firstOfMonth, today, addDays(firstOfMonth, -1), addDays(firstOfMonth, -20), addDays(firstOfMonth, -45)];
+        const categories = ['Combustibil', 'Reparații', 'Salarii', 'Taxe drum / Rovinietă'];
+
+        await as(C).patch('/settings', { eurRate: 4.9765 }).expect(200);
+        const t1 = (await as(C).post('/vehicles', { kind: 'TRUCK', plate: 'CC 01 AAA' }).expect(201)).body.id;
+        const t2 = (await as(C).post('/vehicles', { kind: 'TRUCK', plate: 'CC 02 BBB' }).expect(201)).body.id;
+        const vehicles = [t1, t2, null];
+
+        // Deterministic pseudo-random sequence, so a failure can be replayed.
+        let seed = 20261125;
+        const rand = (n: number) => { seed = (seed * 1103515245 + 12345) % 2 ** 31; return seed % n; };
+
+        type Sent = { type: 'INCOME' | 'EXPENSE'; date: string; cents: number; currency: 'RON' | 'EUR'; rate10k: number; category: string; vehicleId: string | null };
+        const sent: Sent[] = [];
+        for (let i = 0; i < 120; i++) {
+            if (i === 60) await as(C).patch('/settings', { eurRate: 5.0123 }).expect(200);
+            const rate10k = i < 60 ? 49765 : 50123;
+            const tx: Sent = {
+                type: rand(3) === 0 ? 'INCOME' : 'EXPENSE',
+                date: dates[rand(dates.length)],
+                cents: 1 + rand(5_000_000),           // 0.01 … 50,000.00
+                currency: rand(4) === 0 ? 'EUR' : 'RON',
+                rate10k,
+                category: categories[rand(categories.length)],
+                vehicleId: vehicles[rand(vehicles.length)],
+            };
+            if (i === 0) { tx.cents = 13000; tx.currency = 'EUR'; }   // the 646.945 RON half
+            sent.push(tx);
+            await as(C).post('/transactions', {
+                type: tx.type, date: tx.date, amount: tx.cents / 100, currency: tx.currency,
+                category: tx.category, vehicleId: tx.vehicleId,
+            }).expect(201);
+        }
+
+        // Recount with integer math only, from what was sent.
+        const ron = (t: Sent) => (t.currency === 'EUR' ? Math.floor((t.cents * t.rate10k + 5000) / 10000) : t.cents);
+        const sum = (rows: Sent[], type: Sent['type']) => rows.filter((t) => t.type === type).reduce((a, t) => a + ron(t), 0);
+        const expectTotals = (rows: Sent[]) => ({ income: sum(rows, 'INCOME'), expense: sum(rows, 'EXPENSE'), profit: sum(rows, 'INCOME') - sum(rows, 'EXPENSE') });
+
+        // 1. Every stored row: amount and amountRon exactly as recounted.
+        const listed = (await as(C).get('/transactions').expect(200)).body as { amount: number; amountRon: number }[];
+        expect(listed).toHaveLength(120);
+        expect(listed.reduce((a, t) => a + t.amount, 0)).toBe(sent.reduce((a, t) => a + t.cents, 0));
+        expect(listed.reduce((a, t) => a + t.amountRon, 0)).toBe(sent.reduce((a, t) => a + ron(t), 0));
+        const half = listed.find((t) => t.amount === 13000 && t.amountRon === 64695);
+        expect(half).toBeDefined();
+
+        // 2. Financiar over all time: totals, per truck, per category, per month, per currency.
+        const all = (await as(C).get('/transactions/summary').expect(200)).body;
+        expect(all.totals).toMatchObject(expectTotals(sent));
+        for (const v of vehicles) {
+            expect(all.byVehicle.find((r: { vehicleId: string | null }) => r.vehicleId === v)).toMatchObject(expectTotals(sent.filter((t) => t.vehicleId === v)));
+        }
+        for (const c of categories) {
+            const expense = sum(sent.filter((t) => t.category === c), 'EXPENSE');
+            if (expense) expect(all.byCategory.find((r: { category: string }) => r.category === c).expense).toBe(expense);
+        }
+        for (const m of new Set(sent.map((t) => t.date.slice(0, 7)))) {
+            expect(all.byMonth.find((r: { month: string }) => r.month === m)).toMatchObject(expectTotals(sent.filter((t) => t.date.startsWith(m))));
+        }
+        for (const cur of ['RON', 'EUR'] as const) {
+            const rows = sent.filter((t) => t.currency === cur);
+            const native = (type: Sent['type']) => rows.filter((t) => t.type === type).reduce((a, t) => a + t.cents, 0);
+            expect(all.totals.byCurrency[cur]).toEqual({ income: native('INCOME'), expense: native('EXPENSE') });
+        }
+
+        // 3. A period and one truck, as the Financiar filters send them.
+        const from = addDays(firstOfMonth, -31);
+        const period = (await as(C).get(`/transactions/summary?from=${from}&to=${today}&vehicleId=${t1}`).expect(200)).body;
+        expect(period.totals).toMatchObject(expectTotals(sent.filter((t) => t.vehicleId === t1 && t.date >= from && t.date <= today)));
+
+        // 4. The dashboard's "this month" equals the same recount.
+        const dash = (await as(C).get('/dashboard').expect(200)).body;
+        expect(dash.month.totals).toMatchObject(expectTotals(sent.filter((t) => t.date >= firstOfMonth && t.date <= today)));
+
+        // 5. Straight from the database, bypassing the app's own summing.
+        const [db1] = await db.query(
+            `SELECT COALESCE(SUM(CASE WHEN type = 'INCOME' THEN "amountRon" END), 0)::int AS income,
+                    COALESCE(SUM(CASE WHEN type = 'EXPENSE' THEN "amountRon" END), 0)::int AS expense
+             FROM transactions WHERE "ownerId" = $1`, [C]);
+        expect({ income: db1.income, expense: db1.expense }).toEqual({ income: all.totals.income, expense: all.totals.expense });
+    });
+
+    it('refuses amounts too large to store, instead of failing with a server error', async () => {
+        const D = '66666666-6666-4666-8666-666666666666';
+        await as(D).patch('/settings', { eurRate: 20 }).expect(200);
+        await as(D).post('/transactions', { type: 'INCOME', date: todayYmd(), amount: 1_000_000, currency: 'EUR', category: 'Altele (venit)' }).expect(201);
+        await as(D).post('/transactions', { type: 'INCOME', date: todayYmd(), amount: 1_000_000.01, currency: 'EUR', category: 'Altele (venit)' }).expect(400);
+        await as(D).patch('/settings', { eurRate: 25 }).expect(400);
+        const [row] = (await as(D).get('/transactions').expect(200)).body;
+        expect(row.amountRon).toBe(2_000_000_000);
+    });
+
     it('deleting a truck removes its documents and keeps its transactions', async () => {
         await as(A).delete(`/vehicles/${truckId}`).expect(204);
         const docs = (await as(A).get('/documents').expect(200)).body;

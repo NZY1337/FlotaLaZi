@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import { isYmd } from '../fleet/dates';
-import { decimalToMinor, toRonMinor, type Currency } from '../fleet/money';
+import { decimalToMinor, MAX_AMOUNT, MAX_EUR_RATE, toRonMinor, type Currency } from '../fleet/money';
 import { TrailerType, VehicleKind } from '../vehicles/entities/vehicle.entity';
 import { TransactionType } from '../transactions/entities/transaction.entity';
 import { DEFAULT_EUR_RATE } from '../settings/entities/fleet-settings.entity';
@@ -49,7 +49,7 @@ export function mapLegacyBackup(input: unknown): LegacyPlan {
     const s = isObj(o.settings) ? o.settings : {};
     const plan: LegacyPlan = { settings: {}, vehicles: [], documents: [], transactions: [], skipped: 0 };
 
-    const eurRate = num(s.eurRate) > 0 && num(s.eurRate) < 100 ? Math.round(num(s.eurRate) * 10_000) / 10_000 : null;
+    const eurRate = num(s.eurRate) > 0 && num(s.eurRate) <= MAX_EUR_RATE ? Math.round(num(s.eurRate) * 10_000) / 10_000 : null;
     if (eurRate) plan.settings.eurRate = eurRate;
     const oilAlertKm = int(s.oilAlertKm, 0, 100_000, null);
     if (oilAlertKm != null) plan.settings.oilAlertKm = oilAlertKm;
@@ -118,7 +118,7 @@ export function mapLegacyBackup(input: unknown): LegacyPlan {
 
     const rate = eurRate ?? DEFAULT_EUR_RATE;
     for (const t of list(o, 'txs')) {
-        const ok = isObj(t) && isYmd(t.date) && num(t.amount) > 0 && num(t.amount) <= 100_000_000
+        const ok = isObj(t) && isYmd(t.date) && num(t.amount) > 0 && num(t.amount) <= MAX_AMOUNT
             && (t.type === 'income' || t.type === 'expense') && (t.currency === 'RON' || t.currency === 'EUR');
         if (!ok) { plan.skipped++; continue; }
         const currency = t.currency as Currency;

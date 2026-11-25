@@ -3,7 +3,7 @@ import { IsEnum, IsIn, IsInt, IsNumber, IsOptional, IsString, IsUUID, Length, Ma
 import { OmitType, PartialType } from '@nestjs/mapped-types';
 import { TrailerType, VehicleKind } from '../entities/vehicle.entity';
 import { IsYmd } from '../../fleet/is-ymd.validator';
-import { CURRENCIES, type Currency } from '../../fleet/money';
+import { CURRENCIES, type Currency, MAX_AMOUNT } from '../../fleet/money';
 
 const upperTrim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim().toUpperCase() : value);
 const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value);
@@ -94,6 +94,7 @@ export class OilChangeDto {
     @IsOptional()
     @IsNumber({ maxDecimalPlaces: 2 })
     @Min(0.01)
+    @Max(MAX_AMOUNT)
     cost?: number;
 
     @IsOptional()
