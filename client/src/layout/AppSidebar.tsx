@@ -1,14 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 
+import { Truck, FileText, Users, Wallet, Settings } from "lucide-react";
 import {
-    BoxCubeIcon,
     ChevronDownIcon,
     GridIcon,
     HorizontaLDots,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
-import SidebarWidget from "./SidebarWidget";
 
 type NavItem = {
     name: string;
@@ -22,14 +21,14 @@ type NavItem = {
 const navItems: NavItem[] = [
     {
         icon: <GridIcon />,
-        name: "Dashboard",
+        name: "Panou",
         path: "/dashboard",
     },
-    {
-        icon: <BoxCubeIcon />,
-        name: "Servicii",
-        path: "/services",
-    },
+    { icon: <Truck />, name: "Flotă", path: "/fleet" },
+    { icon: <FileText />, name: "Acte & expirări", path: "/documents" },
+    { icon: <Users />, name: "Șoferi", path: "/drivers" },
+    { icon: <Wallet />, name: "Financiar", path: "/finance" },
+    { icon: <Settings />, name: "Setări", path: "/settings" },
 ];
 
 
@@ -46,7 +45,7 @@ const AppSidebar: React.FC = () => {
     );
     const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-    // Nested routes (e.g. /services/:slug) keep their parent item highlighted.
+    // Nested routes keep their parent item highlighted.
     const isActive = useCallback(
         (path: string) => location.pathname === path || location.pathname.startsWith(`${path}/`),
         [location.pathname]
@@ -229,7 +228,7 @@ const AppSidebar: React.FC = () => {
             onMouseEnter={() => !isExpanded && setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}>
             <div className={`py-8 flex`}>
-                <Link to="/">
+                <div>
                     {isExpanded || isHovered || isMobileOpen ? (
                         <>
                             <div className="flex flex-col items-center max-w-xs">
@@ -237,11 +236,11 @@ const AppSidebar: React.FC = () => {
                                     <div className="flex items-center gap-4">
                                         <div className="w-10 h-10 bg-brand-500 flex items-center justify-center">
                                             <span className="text-white font-black text-2xl">
-                                                S
+                                                E
                                             </span>
                                         </div>
                                         <span className="font-black text-2xl tracking-tight text-black dark:text-white uppercase">
-                                            Streamloop
+                                            EuroTrack
                                         </span>
                                     </div>
                                 </Link>
@@ -252,13 +251,13 @@ const AppSidebar: React.FC = () => {
                             <Link to="/" className="block mb-4">
                                 <div className="w-10 h-10 bg-brand-500 flex items-center justify-center">
                                     <span className="text-white font-black text-2xl">
-                                        S
+                                        E
                                     </span>
                                 </div>
                             </Link>
                         </div>
                     )}
-                </Link>
+                </div>
             </div>
             <div className="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
                 <nav className="mb-6">
@@ -280,7 +279,6 @@ const AppSidebar: React.FC = () => {
                         </div>
                     </div>
                 </nav>
-                {isExpanded || isHovered || isMobileOpen ? <SidebarWidget /> : null}
             </div>
         </aside>
     );

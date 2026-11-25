@@ -17,18 +17,18 @@ const renderLayout = (children: React.ReactNode = <div>child content</div>) =>
     );
 
 describe("AuthPageLayout", () => {
-    it("renders the Streamloop wordmark and icon", () => {
+    it("renders the EuroTrack wordmark and icon", () => {
         renderLayout();
 
-        expect(screen.getByText("Streamloop")).toBeInTheDocument();
-        expect(screen.getByAltText("Streamloop")).toBeInTheDocument();
+        expect(screen.getByText("EuroTrack")).toBeInTheDocument();
+        expect(screen.getByRole("img", { name: "EuroTrack" })).toBeInTheDocument();
     });
 
     it("renders the tagline", () => {
         renderLayout();
 
         expect(
-            screen.getByText("Automations that run your business, not the other way around."),
+            screen.getByText("Actele, reviziile și profitul flotei tale — într-un singur loc."),
         ).toBeInTheDocument();
     });
 

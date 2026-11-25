@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import ForgotPassword from "./pages/AuthPages/ForgotPassword";
@@ -6,9 +6,11 @@ import ResetPassword from "./pages/AuthPages/ResetPassword";
 import NotFound from "./pages/OtherPage/NotFound";
 import AppLayout from "./layout/AppLayout";
 import Home from "./pages/Dashboard/Home";
-import Services from "./pages/Dashboard/Services/Services";
-import ServiceDetail from "./pages/Dashboard/Services/ServiceDetail";
-import Homepage from "./components/Homepage";
+import Fleet from "./pages/Fleet/Fleet";
+import Documents from "./pages/Documents/Documents";
+import Drivers from "./pages/Drivers/Drivers";
+import Finance from "./pages/Finance/Finance";
+import Settings from "./pages/Settings/Settings";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import RedirectIfAuthenticated from "./components/common/RedirectIfAuthenticated";
 
@@ -17,13 +19,16 @@ export default function App() {
         <>
             <Router>
                 <Routes>
-                    <Route path="/" element={<Homepage />} />
+                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
                     <Route element={<ProtectedRoute />}>
                         <Route element={<AppLayout />}>
                             <Route path="/dashboard" element={<Home />} />
-                            <Route path="/services" element={<Services />} />
-                            <Route path="/services/:slug" element={<ServiceDetail />} />
+                            <Route path="/fleet" element={<Fleet />} />
+                            <Route path="/documents" element={<Documents />} />
+                            <Route path="/drivers" element={<Drivers />} />
+                            <Route path="/finance" element={<Finance />} />
+                            <Route path="/settings" element={<Settings />} />
                         </Route>
                     </Route>
 

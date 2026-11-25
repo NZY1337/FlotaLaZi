@@ -10,8 +10,3 @@ export enum Role {
     USER = 'user',
     ADMIN = 'admin',
 }
-
-export enum BillingType {
-    ONE_TIME = 'ONE_TIME',
-    SUBSCRIPTION = 'SUBSCRIPTION',
-}

@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as dotenv from 'dotenv';
@@ -7,7 +8,9 @@ dotenv.config();
 
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
+    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+    // Legacy backups (POST /import/legacy) can exceed the 100kb default.
+    app.useBodyParser('json', { limit: '5mb' });
     app.setGlobalPrefix('api');
     app.enableCors({
         origin: true,

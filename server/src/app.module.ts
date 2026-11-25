@@ -1,26 +1,37 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { UserModule } from './user/user.module';
-import { Notification } from './notifications/entities/notification.entity';
-import { Service } from './catalog/entities/service.entity';
-import { CatalogModule } from './catalog/catalog.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 
 // interceptors
-import { APP_INTERCEPTOR } from '@nestjs/core';
 import { UserSyncInterceptor } from './interceptors/user-sync.interceptor';
 
 // entities
 import { UserEntity } from './user/entities/user.entity';
+import { Notification } from './notifications/entities/notification.entity';
+import { FleetSettings } from './settings/entities/fleet-settings.entity';
+import { Vehicle } from './vehicles/entities/vehicle.entity';
+import { Driver } from './drivers/entities/driver.entity';
+import { FleetDocument } from './documents/entities/document.entity';
+import { Transaction } from './transactions/entities/transaction.entity';
 
-// services
+// infrastructure
 import { SupabaseModule } from '../services/supabase/supabase.module';
 import { NodemailerModule } from '../services/nodemailer/nodemailer.module';
-import { ScheduleModule } from '@nestjs/schedule';
-import { TaskServiceModule } from '../services/taskservice/taskservice.module';
-import { NotificationsModule } from './notifications/notifications.module';
-import { EventEmitterModule } from '@nestjs/event-emitter';
 
+// modules
+import { UserModule } from './user/user.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { SettingsModule } from './settings/settings.module';
+import { VehiclesModule } from './vehicles/vehicles.module';
+import { DriversModule } from './drivers/drivers.module';
+import { DocumentsModule } from './documents/documents.module';
+import { TransactionsModule } from './transactions/transactions.module';
+import { DashboardModule } from './dashboard/dashboard.module';
+import { RemindersModule } from './reminders/reminders.module';
+import { LegacyImportModule } from './legacy-import/legacy-import.module';
 
 @Module({
     imports: [
@@ -30,16 +41,22 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
         TypeOrmModule.forRoot({
             type: 'postgres',
             url: process.env.DATABASE_URL,
-            entities: [UserEntity, Notification, Service],
+            entities: [UserEntity, Notification, FleetSettings, Vehicle, Driver, FleetDocument, Transaction],
             // Schema changes go through migrations only (npm run migration:run).
             synchronize: false,
         }),
         SupabaseModule,
         NodemailerModule,
-        TaskServiceModule,
         UserModule,
         NotificationsModule,
-        CatalogModule,
+        SettingsModule,
+        VehiclesModule,
+        DriversModule,
+        DocumentsModule,
+        TransactionsModule,
+        DashboardModule,
+        RemindersModule,
+        LegacyImportModule,
     ],
     providers: [{
         provide: APP_INTERCEPTOR,
