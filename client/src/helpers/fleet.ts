@@ -87,9 +87,35 @@ export const LEVEL_STYLES: Record<Level, { badge: string; border: string; bar: s
     },
 };
 
-/** "" → null, otherwise a number (NaN → null). */
-export const numberOrNull = (value: string): number | null => {
-    if (value.trim() === '') return null;
-    const n = Number(value.replace(',', '.'));
+/**
+ * Reads a number the way a Romanian types it. '.' groups thousands and ','
+ * marks decimals ("1.500" = 1500, "1.500,50" = 1500.5), but many also type a
+ * decimal point ("12.5"). So '.' followed by exactly three digits, in groups,
+ * means thousands; any other single '.' or ',' means decimals. Anything else
+ * ("1,500", "1.5.0", more decimals than allowed) is unclear: null, so the form
+ * asks again instead of saving a wrong amount. "" is null too.
+ */
+export const parseNumberInput = (input: string, maxDecimals: number): number | null => {
+    const value = input.trim().replace(/[\s\u00a0]/g, '');
+    if (value === '') return null;
+    let normalized: string;
+    if (/^\d+$/.test(value)) {
+        normalized = value;
+    } else if (/^\d{1,3}(\.\d{3})+(,\d+)?$/.test(value)) {
+        normalized = value.replace(/\./g, '').replace(',', '.');      // 1.500 / 1.500,50
+    } else if (/^\d{1,3}(,\d{3})+\.\d+$/.test(value)) {
+        normalized = value.replace(/,/g, '');                          // 1,500.50
+    } else if (/^\d+[.,]\d+$/.test(value)) {
+        normalized = value.replace(',', '.');                          // 12.5 / 12,5
+    } else {
+        return null;
+    }
+    const decimals = normalized.split('.')[1]?.length ?? 0;
+    if (decimals > maxDecimals) return null;
+    const n = Number(normalized);
     return Number.isFinite(n) ? n : null;
 };
+
+/** How a parsed number reads back in Romanian: 1500.5 → "1.500,50". */
+export const formatNumberInput = (n: number, decimals: number) =>
+    n.toLocaleString('ro-RO', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });

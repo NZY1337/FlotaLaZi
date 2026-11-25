@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { FormModal, Row, SelectField, TextField } from './ui';
+import { FormModal, NumberField, Row, SelectField, TextField } from './ui';
 import { useTransactionMutations } from '../../hooks/useTransactions';
 import { useVehicles } from '../../hooks/useVehicles';
-import { EXPENSE_CATEGORIES, FUEL_CATEGORY, INCOME_CATEGORIES, numberOrNull, todayInput } from '../../helpers/fleet';
+import { EXPENSE_CATEGORIES, FUEL_CATEGORY, INCOME_CATEGORIES, parseNumberInput, todayInput } from '../../helpers/fleet';
 import type { Currency, Transaction, TransactionType } from '../../services/transactions';
 
 type Props = { isOpen: boolean; onClose: () => void; type?: TransactionType; transaction?: Transaction | null };
@@ -52,11 +52,11 @@ export default function TransactionFormModal({ isOpen, onClose, type = 'EXPENSE'
         const input = {
             type: txType,
             date,
-            amount: Number(amount.replace(',', '.')),
+            amount: parseNumberInput(amount, 2) ?? 0,
             currency,
             category,
             vehicleId: vehicleId || null,
-            liters: category === FUEL_CATEGORY ? numberOrNull(liters) : null,
+            liters: category === FUEL_CATEGORY ? parseNumberInput(liters, 2) : null,
             notes,
         };
         const done = { onSuccess: onClose };
@@ -81,7 +81,7 @@ export default function TransactionFormModal({ isOpen, onClose, type = 'EXPENSE'
                     options={[{ value: 'INCOME', label: '🟢 Încasare' }, { value: 'EXPENSE', label: '🔴 Cheltuială' }]} />
             )}
             <Row>
-                <TextField label="Sumă" type="number" min={0.01} step="0.01" value={amount} onChange={setAmount} required placeholder="0,00" />
+                <NumberField label="Sumă" decimals={2} unit={currency === 'EUR' ? '€' : 'lei'} min={0.01} value={amount} onChange={setAmount} required placeholder="ex: 1.500,00" />
                 <SelectField label="Monedă" value={currency} onChange={(v) => setCurrency(v as Currency)} options={[{ value: 'RON', label: 'RON' }, { value: 'EUR', label: 'EUR' }]} />
             </Row>
             <Row>
@@ -90,7 +90,7 @@ export default function TransactionFormModal({ isOpen, onClose, type = 'EXPENSE'
             </Row>
             <SelectField label="Camion / remorcă" value={vehicleId} onChange={setVehicleId}
                 options={[{ value: '', label: '🏢 General / firmă' }, ...vehicles.map((v) => ({ value: v.id, label: `${v.kind === 'TRUCK' ? '🚛' : '🚚'} ${v.plate}` }))]} />
-            {category === FUEL_CATEGORY && <TextField label="Litri (opțional)" type="number" min={0} step="0.01" value={liters} onChange={setLiters} />}
+            {category === FUEL_CATEGORY && <NumberField label="Litri (opțional)" decimals={2} unit="litri" min={0} value={liters} onChange={setLiters} />}
             <TextField label="Descriere" value={notes} onChange={setNotes} placeholder={txType === 'INCOME' ? 'ex: cursă Arad – München' : 'opțional'} />
         </FormModal>
     );
