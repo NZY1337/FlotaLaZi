@@ -10,6 +10,14 @@ describe('dates', () => {
         expect(isYmd(20260101)).toBe(false);
     });
 
+    it('rejects years outside 2000-2099 (typos like 202788 or 0202)', () => {
+        expect(isYmd('2000-01-01')).toBe(true);
+        expect(isYmd('2099-12-31')).toBe(true);
+        expect(isYmd('1999-12-31')).toBe(false);
+        expect(isYmd('0202-05-01')).toBe(false);
+        expect(isYmd('202788-05-01')).toBe(false);
+    });
+
     it('computes today in Bucharest, not UTC', () => {
         // 22:30 UTC on 31 Dec is already 1 Jan in Romania (UTC+2).
         expect(todayYmd(new Date('2026-12-31T22:30:00Z'))).toBe('2027-01-01');
