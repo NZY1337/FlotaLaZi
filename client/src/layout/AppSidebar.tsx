@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 
 import {
+    BoxCubeIcon,
     ChevronDownIcon,
     GridIcon,
     HorizontaLDots,
@@ -24,6 +25,11 @@ const navItems: NavItem[] = [
         name: "Dashboard",
         path: "/dashboard",
     },
+    {
+        icon: <BoxCubeIcon />,
+        name: "Servicii",
+        path: "/services",
+    },
 ];
 
 
@@ -40,8 +46,9 @@ const AppSidebar: React.FC = () => {
     );
     const subMenuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+    // Nested routes (e.g. /services/:slug) keep their parent item highlighted.
     const isActive = useCallback(
-        (path: string) => location.pathname === path,
+        (path: string) => location.pathname === path || location.pathname.startsWith(`${path}/`),
         [location.pathname]
     );
 

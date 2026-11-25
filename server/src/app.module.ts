@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { Notification } from './notifications/entities/notification.entity';
+import { Service } from './catalog/entities/service.entity';
+import { CatalogModule } from './catalog/catalog.module';
 
 // interceptors
 import { APP_INTERCEPTOR } from '@nestjs/core';
@@ -27,15 +29,17 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
         ConfigModule.forRoot({ isGlobal: true }),
         TypeOrmModule.forRoot({
             type: 'postgres',
-            url: process.env.LOCAL_DB_URL,
-            entities: [UserEntity, Notification],
-            synchronize: true,
+            url: process.env.DATABASE_URL,
+            entities: [UserEntity, Notification, Service],
+            // Schema changes go through migrations only (npm run migration:run).
+            synchronize: false,
         }),
         SupabaseModule,
         NodemailerModule,
         TaskServiceModule,
         UserModule,
         NotificationsModule,
+        CatalogModule,
     ],
     providers: [{
         provide: APP_INTERCEPTOR,

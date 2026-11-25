@@ -493,10 +493,14 @@ real endpoint or entity to put in it.
 
 - Frontend and backend are developed and can be deployed independently —
   never assume they share a process, a port, or a filesystem.
-- Migrations: TypeORM `synchronize: true` is fine for local dev (already the
-  case in `app.module.ts`); once there's real client data, switch to proper
-  migrations before any further schema change — don't do this prematurely
-  either.
+- Migrations: `synchronize` is **off**; schema changes go through TypeORM
+  migrations in `server/src/migrations/` (the app and the migration CLI both
+  read `DATABASE_URL` — local Postgres in dev, Supabase's session pooler/direct
+  connection, port 5432, in production; never the 6543 transaction pooler).
+  After changing an entity: `npm run migration:generate -- src/migrations/<Name>`,
+  review the SQL, then `npm run migration:run`. Every migration that creates a
+  table must also `ENABLE ROW LEVEL SECURITY` on it (Supabase exposes `public`
+  tables through its Data API; no policies needed — the backend bypasses RLS).
 - Environment variables live in `.env` (already gitignored on the server
   side); new ones needed for this work: payment provider keys/secrets,
   `N8N_WEBHOOK_URL`, `N8N_INBOUND_SECRET`.
