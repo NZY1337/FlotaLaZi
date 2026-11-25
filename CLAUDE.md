@@ -296,6 +296,14 @@ Pricing to test: ~5–8 € per truck per month, first 2 trucks free.
   `GMAIL_USERNAME`, `GMAIL_APP_PASSWORD`, `APP_URL`, `PORT`.
   Env (client): `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY`,
   `VITE_BACKEND_URL` (defaults to `http://localhost:3010/api`).
+- Deploy: `client/` → Vercel (root `client`, `vercel.json` rewrites every
+  path to `index.html` for client-side routes); `server/` → an always-on host
+  such as Railway (root `server`, build `npm run build`, start
+  `npm run start:prod` = `node dist/src/main` — the build nests output under
+  `dist/src/` because `services/` lives outside `src/`). Never a host that
+  sleeps: the 08:00 reminder cron must run. Migrations are run by hand
+  (`npm run migration:run` with the production `DATABASE_URL`) before
+  deploying a schema change.
 - When a change touches both sides, land the backend endpoint/DTO first.
 - Tests: `server` → `npm test` (jest, unit) and
   `E2E_DATABASE_URL=postgres://… npm run test:e2e` (API against a **throwaway**
