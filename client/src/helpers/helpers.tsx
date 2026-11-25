@@ -21,5 +21,13 @@ const formatDate = (dateString: string): string => {
     return `${day} ${month}`;
 };
 
+// Prices arrive from the backend as integers in minor units (cents).
+// Presentation only — the amounts themselves are never computed client-side.
+// narrowSymbol: ro-RO would otherwise print the ISO code ("299,00 EUR"); this gives "299,00 €" ("lei" for RON).
+const formatPrice = (minorUnits: number, currency: string): string => {
+    const formatter = new Intl.NumberFormat('ro-RO', { style: 'currency', currency, currencyDisplay: 'narrowSymbol' });
+    const fractionDigits = formatter.resolvedOptions().maximumFractionDigits ?? 2;
+    return formatter.format(minorUnits / 10 ** fractionDigits);
+};
 
-export { extractTitle, formatDate };
+export { extractTitle, formatDate, formatPrice };
