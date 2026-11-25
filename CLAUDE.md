@@ -319,6 +319,9 @@ Pricing to test: ~5–8 € per truck per month, first 2 trucks free.
   (`npm run migration:run` with the production `DATABASE_URL`) before
   deploying a schema change.
 - When a change touches both sides, land the backend endpoint/DTO first.
+- CI: `.github/workflows/ci.yml` runs the server build, unit tests and API
+  tests (against a Postgres service container, migrated first) and the client
+  tests and build on every pull request and push to `main`. Merge only green.
 - Tests: `server` → `npm test` (jest, unit) and
   `E2E_DATABASE_URL=postgres://… npm run test:e2e` (API against a **throwaway**
   migrated database — the suite truncates every fleet table);
