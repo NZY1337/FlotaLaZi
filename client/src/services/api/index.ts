@@ -1,4 +1,6 @@
+import { isAuthApiError, isAuthSessionMissingError } from '@supabase/supabase-js';
 import { BACKEND_URL } from '../../helpers/constants';
+import { supabase } from '../../../lib/supabase';
 
 /** Error carrying the backend's status and (first) validation message. */
 export class ApiError extends Error {
@@ -6,6 +8,17 @@ export class ApiError extends Error {
         super(message);
     }
 }
+
+// The backend answered 401: if Supabase confirms the session is gone (signed
+// out elsewhere, revoked), drop it locally so ProtectedRoute sends the user to
+// /signin instead of every page showing a load error. A network blip is not a
+// dead session, so only an auth error from Supabase signs out.
+const signOutIfSessionGone = async () => {
+    const { error } = await supabase.auth.getUser();
+    if (error && (isAuthSessionMissingError(error) || isAuthApiError(error))) {
+        await supabase.auth.signOut({ scope: 'local' });
+    }
+};
 
 // One fetch wrapper for the authenticated fleet API: adds the bearer token and
 // JSON headers, throws ApiError on non-2xx, returns null for 204.
@@ -24,6 +37,7 @@ export const apiFetch = async <T>(token: string, path: string, init: RequestInit
             const body = await response.json();
             message = Array.isArray(body?.message) ? body.message[0] : body?.message ?? message;
         } catch { /* not JSON */ }
+        if (response.status === 401) await signOutIfSessionGone().catch(() => undefined);
         throw new ApiError(response.status, message);
     }
     if (response.status === 204) return null as T;

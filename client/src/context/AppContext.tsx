@@ -21,8 +21,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const [session, setSession] = useState<Session | null>(null)
     const [sessionLoaded, setSessionLoaded] = useState(false);
 
-    console.log('AppContext session:', session?.access_token)
-
     const login = async (provider: Provider) => {
         const options: Record<string, Record<string, string>> = {
             google: { prompt: 'select_account' },
@@ -68,8 +66,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return { data, error }
     }
 
+    // 'local': signing out on one device must not end the owner's sessions on
+    // the others (Supabase's default, 'global', revokes them all).
     const logout = async () => {
-        await supabase.auth.signOut()
+        await supabase.auth.signOut({ scope: 'local' })
     }
 
     useEffect(() => {
