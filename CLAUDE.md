@@ -70,7 +70,11 @@ External systems:
 - **Supabase** — authentication only (`SupabaseAuthGuard`, `SupabaseService`).
 - **PostgreSQL** — all business data (Supabase Postgres in production).
   The frontend never queries tables directly; it only talks to the backend.
-- **SMTP (nodemailer)** — reminder and welcome emails.
+- **Email** — reminder and welcome emails, sent by `NodemailerService`
+  (`server/services/nodemailer/`): Resend's HTTPS API when `RESEND_API_KEY`
+  is set (production — Railway blocks outbound SMTP below the Pro plan),
+  otherwise Gmail SMTP (local dev). The welcome email is sent in the
+  background, once per user; a mail failure never fails a request.
 - **WhatsApp Cloud API** — planned reminder channel (§10).
 
 No shared runtime, no shared code, no monorepo tooling.
@@ -219,7 +223,7 @@ their documents.
   run: one in-app notification per item + one email.
 - `POST /reminders/test` ("Trimite-mi alertele acum" in Setări) sends the
   caller everything currently red/yellow — no threshold days, emails even
-  with `emailAlerts` off, reports SMTP errors in its result, never touches
+  with `emailAlerts` off, reports email errors in its result, never touches
   `lastAlertedOn` / `lastOilAlertOn`, and is limited to once a minute.
 
 ## 8. API conventions
@@ -293,7 +297,10 @@ Pricing to test: ~5–8 € per truck per month, first 2 trucks free.
 - EuroTrack needs its **own** Supabase project — never point it at
   Streamloop's database.
 - Env (server): `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`,
-  `GMAIL_USERNAME`, `GMAIL_APP_PASSWORD`, `APP_URL`, `PORT`.
+  `RESEND_API_KEY` + `MAIL_FROM` (production email; `MAIL_FROM` must be on
+  a domain verified in Resend — without it Resend's test sender only reaches
+  the Resend account owner), `GMAIL_USERNAME`, `GMAIL_APP_PASSWORD` (local
+  dev email), `APP_URL`, `PORT`.
   Env (client): `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY`,
   `VITE_BACKEND_URL` (defaults to `http://localhost:3010/api`).
 - Deploy: `client/` → Vercel (root `client`, `vercel.json` rewrites every
