@@ -6,9 +6,14 @@ export const BUSINESS_TIME_ZONE = 'Europe/Bucharest';
 
 const YMD = /^\d{4}-\d{2}-\d{2}$/;
 
+// Business dates are this century; anything else is a typo (e.g. year 0202).
+const MIN_YEAR = 2000;
+const MAX_YEAR = 2099;
+
 export function isYmd(value: unknown): value is string {
     if (typeof value !== 'string' || !YMD.test(value)) return false;
     const [y, m, d] = value.split('-').map(Number);
+    if (y < MIN_YEAR || y > MAX_YEAR) return false;
     const date = new Date(Date.UTC(y, m - 1, d));
     return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
 }

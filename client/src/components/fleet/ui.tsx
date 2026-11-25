@@ -118,6 +118,11 @@ export function ErrorText({ error }: { error: unknown }) {
     return <p role="alert" className="rounded-lg bg-error-50 px-3 py-2 text-sm text-error-700 dark:bg-error-500/15 dark:text-error-400">{message}</p>;
 }
 
+// Without bounds, a native date input lets the year run to 6 digits (202788).
+// Same range the server accepts.
+const DATE_MIN = '2000-01-01';
+const DATE_MAX = '2099-12-31';
+
 export function TextField({ label, value, onChange, type = 'text', required, placeholder, hint, min, max, step, uppercase }: {
     label: string;
     value: string;
@@ -143,8 +148,8 @@ export function TextField({ label, value, onChange, type = 'text', required, pla
                 value={value}
                 required={required}
                 placeholder={placeholder}
-                min={min}
-                max={max}
+                min={min ?? (type === 'date' ? DATE_MIN : undefined)}
+                max={max ?? (type === 'date' ? DATE_MAX : undefined)}
                 step={step}
                 inputMode={type === 'number' ? 'decimal' : undefined}
                 onChange={(e) => onChange(e.target.value)}
