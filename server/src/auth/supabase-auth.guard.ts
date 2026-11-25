@@ -2,6 +2,7 @@ import {
     CanActivate,
     ExecutionContext,
     Injectable,
+    Logger,
     UnauthorizedException,
 } from '@nestjs/common';
 
@@ -10,6 +11,8 @@ import { SupabaseService } from '../../services/supabase/supabase.service';
 
 @Injectable()
 export class SupabaseAuthGuard implements CanActivate {
+    private readonly logger = new Logger(SupabaseAuthGuard.name);
+
     constructor(
         private readonly supabase: SupabaseService,
     ) { }
@@ -26,6 +29,9 @@ export class SupabaseAuthGuard implements CanActivate {
         const { data: { user }, error } = await this.supabase.getUser(token);
 
         if (error || !user) {
+            // Log Supabase's reason (never the token): a wrong SUPABASE_SERVICE_ROLE_KEY
+            // and an expired session both end up as the same 401 for the client.
+            this.logger.warn(`Token rejected by Supabase: ${error?.status ?? ''} ${error?.message ?? 'no user'}`);
             throw new UnauthorizedException('Invalid or expired token');
         }
 
