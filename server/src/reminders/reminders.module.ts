@@ -6,9 +6,11 @@ import { FleetSettings } from '../settings/entities/fleet-settings.entity';
 import { UserEntity } from '../user/entities/user.entity';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { RemindersService } from './reminders.service';
+import { RemindersController } from './reminders.controller';
 
 @Module({
     imports: [TypeOrmModule.forFeature([FleetDocument, Vehicle, FleetSettings, UserEntity]), NotificationsModule],
+    controllers: [RemindersController],
     providers: [RemindersService],
 })
 export class RemindersModule { }
