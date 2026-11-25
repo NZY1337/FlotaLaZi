@@ -22,6 +22,7 @@ describeDb('EuroTrack API (e2e)', () => {
     let app: INestApplication;
     let db: DataSource;
     const sendText = jest.fn().mockResolvedValue({});
+    const sendWelcomeEmail = jest.fn().mockResolvedValue({});
 
     const as = (user: string) => ({
         get: (url: string) => request(app.getHttpServer()).get(`/api${url}`).set('Authorization', `Bearer ${user}`),
@@ -44,7 +45,7 @@ describeDb('EuroTrack API (e2e)', () => {
                 }),
             })
             .overrideProvider(NodemailerService)
-            .useValue({ sendWelcomeEmail: jest.fn().mockResolvedValue({}), sendText })
+            .useValue({ sendWelcomeEmail, sendText })
             .compile();
 
         app = moduleRef.createNestApplication();
@@ -65,6 +66,20 @@ describeDb('EuroTrack API (e2e)', () => {
 
     it('rejects requests without a token', async () => {
         await request(app.getHttpServer()).get('/api/vehicles').expect(401);
+    });
+
+    it('sends the welcome email once, even when a new user\'s first requests race', async () => {
+        const C = '33333333-3333-4333-8333-333333333333';
+        sendWelcomeEmail.mockClear();
+        await Promise.all([as(C).get('/settings'), as(C).get('/vehicles'), as(C).get('/dashboard')].map((r) => r.expect(200)));
+        await as(C).get('/settings').expect(200);
+        expect(sendWelcomeEmail).toHaveBeenCalledTimes(1);
+        expect(sendWelcomeEmail.mock.calls[0][0]).toBe('3333@test.ro');
+    });
+
+    it('keeps serving requests when the welcome email fails', async () => {
+        sendWelcomeEmail.mockRejectedValueOnce(new Error('SMTP timeout'));
+        await as('44444444-4444-4444-8444-444444444444').get('/vehicles').expect(200);
     });
 
     it('creates default settings on first read, even when two first reads race', async () => {

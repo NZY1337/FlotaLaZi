@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
@@ -8,19 +8,35 @@ import { NodemailerService } from '../../services/nodemailer/nodemailer.service'
 
 @Injectable()
 export class UserService {
+    private readonly logger = new Logger(UserService.name);
+
     constructor(@InjectRepository(UserEntity) private repo: Repository<UserEntity>,
         private readonly nodemailer: NodemailerService
     ) { }
 
+    // Runs on every authenticated request (UserSyncInterceptor), often several
+    // in parallel on a first login. INSERT … ON CONFLICT DO NOTHING lets exactly
+    // one of them see the row as new, so the welcome email goes out once.
     async upsertUser(user: CreateUserDto) {
-        const existing = await this.repo.findOneBy({ id: user.id });
+        const values = { id: user.id, email: user.email, name: user.name, avatar: user.avatar };
+        const inserted = await this.repo.createQueryBuilder()
+            .insert()
+            .values(values)
+            .orIgnore()
+            .returning('id')
+            .execute();
+        const isNew = Array.isArray(inserted.raw) && inserted.raw.length > 0;
 
-        await this.repo.upsert({ id: user.id, email: user.email, name: user.name, avatar: user.avatar }, ['id']);
-
-        if (!existing) {
-            console.log(`New user created: ${user.email} (${user.id})`);
-            await this.nodemailer.sendWelcomeEmail(user.email, user.name);
+        if (!isNew) {
+            await this.repo.update({ id: user.id }, { email: user.email, name: user.name, avatar: user.avatar });
+            return;
         }
+
+        this.logger.log(`New user created: ${user.email} (${user.id})`);
+        // Never block the request on email: a slow or failing mail provider
+        // must not delay the user's first page load.
+        this.nodemailer.sendWelcomeEmail(user.email, user.name)
+            .catch((error: Error) => this.logger.warn(`Welcome email to ${user.email} failed: ${error.message}`));
     }
 
     findById(id: string): Promise<UserEntity | null> {
