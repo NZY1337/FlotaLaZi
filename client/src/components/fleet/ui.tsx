@@ -1,7 +1,7 @@
-import { useId, type ReactNode } from 'react';
+import { useEffect, useId, useRef, type ReactNode } from 'react';
 import { Modal } from '../ui/modal';
 import type { Level } from '../../services/vehicles';
-import { LEVEL_STYLES } from '../../helpers/fleet';
+import { LEVEL_STYLES, formatNumberInput, parseNumberInput } from '../../helpers/fleet';
 
 // Small building blocks shared by the fleet screens. Styling follows the
 // existing TailAdmin-based shell (Card = the dashboard's rounded-2xl panels).
@@ -155,6 +155,57 @@ export function TextField({ label, value, onChange, type = 'text', required, pla
                 onChange={(e) => onChange(e.target.value)}
                 className={`${inputClasses} ${uppercase ? 'uppercase placeholder:normal-case' : ''}`}
             />
+            {hint && <p className="mt-1 text-xs text-gray-500">{hint}</p>}
+        </div>
+    );
+}
+
+/**
+ * A number typed the Romanian way ("1.500", "1.500,50", "12,5"). A native
+ * number input reads "1.500" as 1.5, so this is a text input that parses it
+ * with parseNumberInput, shows how it read the number under the field, and
+ * blocks the form (the browser's own message) while it is unclear or too small.
+ */
+export function NumberField({ label, value, onChange, decimals = 0, unit, min, required, placeholder, hint }: {
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+    decimals?: number;
+    unit?: string;
+    min?: number;
+    required?: boolean;
+    placeholder?: string;
+    hint?: string;
+}) {
+    const id = useId();
+    const ref = useRef<HTMLInputElement>(null);
+    const parsed = parseNumberInput(value, decimals);
+    const filled = value.trim() !== '';
+    const problem = !filled ? ''
+        : parsed === null
+            ? (decimals > 0 ? 'Sumă neclară. Scrie de exemplu 1500, 1.500 sau 1.500,50.' : 'Număr neclar. Scrie de exemplu 450000 sau 450.000.')
+            : min !== undefined && parsed < min ? `Minimum ${formatNumberInput(min, decimals)}.` : '';
+    useEffect(() => { ref.current?.setCustomValidity(problem); }, [problem]);
+    const reading = filled && parsed !== null ? `= ${formatNumberInput(parsed, decimals)}${unit ? ` ${unit}` : ''}` : null;
+    return (
+        <div>
+            <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                {label}{required && ' *'}
+            </label>
+            <input
+                ref={ref}
+                id={id}
+                type="text"
+                inputMode={decimals > 0 ? 'decimal' : 'numeric'}
+                autoComplete="off"
+                value={value}
+                required={required}
+                placeholder={placeholder}
+                onChange={(e) => onChange(e.target.value)}
+                className={inputClasses}
+            />
+            {problem && <p className="mt-1 text-xs text-error-500">{problem}</p>}
+            {!problem && reading && <p className="mt-1 text-xs font-medium text-gray-600 dark:text-gray-300">{reading}</p>}
             {hint && <p className="mt-1 text-xs text-gray-500">{hint}</p>}
         </div>
     );

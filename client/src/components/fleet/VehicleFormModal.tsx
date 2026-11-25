@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { FormModal, Row, SelectField, TextField } from './ui';
+import { FormModal, NumberField, Row, SelectField, TextField } from './ui';
 import { useVehicles } from '../../hooks/useVehicles';
-import { numberOrNull } from '../../helpers/fleet';
+import { parseNumberInput } from '../../helpers/fleet';
 import type { TrailerType, Vehicle, VehicleInput, VehicleKind } from '../../services/vehicles';
 
 type Props = { isOpen: boolean; onClose: () => void; kind: VehicleKind; vehicle?: Vehicle | null };
@@ -35,11 +35,11 @@ export default function VehicleFormModal({ isOpen, onClose, kind, vehicle }: Pro
         if (isTruck) {
             Object.assign(input, {
                 attachedTrailerId: form.attachedTrailerId || null,
-                km: numberOrNull(form.km),
-                lastOilKm: numberOrNull(form.lastOilKm),
-                oilIntervalKm: numberOrNull(form.oilIntervalKm),
+                km: parseNumberInput(form.km, 0),
+                lastOilKm: parseNumberInput(form.lastOilKm, 0),
+                oilIntervalKm: parseNumberInput(form.oilIntervalKm, 0),
                 lastOilDate: form.lastOilDate || null,
-                oilIntervalMonths: numberOrNull(form.oilIntervalMonths),
+                oilIntervalMonths: parseNumberInput(form.oilIntervalMonths, 0),
             });
         } else {
             input.trailerType = form.trailerType as TrailerType;
@@ -72,10 +72,10 @@ export default function VehicleFormModal({ isOpen, onClose, kind, vehicle }: Pro
             {isTruck && (
                 <>
                     <SelectField label="Remorcă cuplată" value={form.attachedTrailerId} onChange={set('attachedTrailerId')} options={trailerOptions} />
-                    <TextField label="Kilometraj actual" type="number" min={0} value={form.km} onChange={set('km')} />
+                    <NumberField label="Kilometraj actual" unit="km" min={0} value={form.km} onChange={set('km')} />
                     <Row>
-                        <TextField label="Ultimul schimb de ulei la (km)" type="number" min={0} value={form.lastOilKm} onChange={set('lastOilKm')} />
-                        <TextField label="Interval schimb (km)" type="number" min={1000} value={form.oilIntervalKm} onChange={set('oilIntervalKm')} />
+                        <NumberField label="Ultimul schimb de ulei la (km)" unit="km" min={0} value={form.lastOilKm} onChange={set('lastOilKm')} />
+                        <NumberField label="Interval schimb (km)" unit="km" min={1000} value={form.oilIntervalKm} onChange={set('oilIntervalKm')} />
                     </Row>
                     <Row>
                         <TextField label="Data ultimului schimb" type="date" value={form.lastOilDate} onChange={set('lastOilDate')} />

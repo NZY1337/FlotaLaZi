@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { FormModal, Row, SelectField, TextField } from './ui';
+import { FormModal, NumberField, Row, SelectField, TextField } from './ui';
 import { useVehicles } from '../../hooks/useVehicles';
-import { todayInput } from '../../helpers/fleet';
+import { parseNumberInput, todayInput } from '../../helpers/fleet';
 import type { Currency } from '../../services/transactions';
 import type { Vehicle } from '../../services/vehicles';
 
@@ -32,9 +32,9 @@ export default function KmModal({ truck, mode, onClose }: Props) {
     const submit = () => {
         const done = { onSuccess: onClose };
         if (mode === 'km') {
-            update.mutate({ id: truck.id, input: { km: Number(km) } }, done);
+            update.mutate({ id: truck.id, input: { km: parseNumberInput(km, 0) ?? 0 } }, done);
         } else {
-            oilChange.mutate({ id: truck.id, input: { km: Number(km), date, ...(cost ? { cost: Number(cost.replace(',', '.')), currency } : {}) } }, done);
+            oilChange.mutate({ id: truck.id, input: { km: parseNumberInput(km, 0) ?? 0, date, ...(cost.trim() ? { cost: parseNumberInput(cost, 2) ?? 0, currency } : {}) } }, done);
         }
     };
 
@@ -47,12 +47,12 @@ export default function KmModal({ truck, mode, onClose }: Props) {
             pending={mutation.isPending}
             error={mutation.error}
         >
-            <TextField label="Kilometraj din bord" type="number" min={0} value={km} onChange={setKm} required />
+            <NumberField label="Kilometraj din bord" unit="km" min={0} value={km} onChange={setKm} required />
             {mode === 'oil' && (
                 <>
                     <TextField label="Data schimbului" type="date" value={date} onChange={setDate} required />
                     <Row>
-                        <TextField label="Cost (opțional)" type="number" min={0} step="0.01" value={cost} onChange={setCost} hint="Se adaugă automat la cheltuieli." />
+                        <NumberField label="Cost (opțional)" decimals={2} unit={currency === 'EUR' ? '€' : 'lei'} min={0} value={cost} onChange={setCost} hint="Se adaugă automat la cheltuieli." />
                         <SelectField label="Monedă" value={currency} onChange={(v) => setCurrency(v as Currency)} options={[{ value: 'RON', label: 'RON' }, { value: 'EUR', label: 'EUR' }]} />
                     </Row>
                 </>
