@@ -30,7 +30,7 @@ export default function Footer() {
                     </div>
                 </div>
                 <div className="pt-10 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-6 text-[10px] font-black uppercase tracking-[0.2em] text-gray-300">
-                    <p>© {new Date().getFullYear()} EuroTrack. Toate drepturile rezervate.</p>
+                    <p>© {new Date().getFullYear()} FlotaLaZi. Toate drepturile rezervate.</p>
                     <p className="normal-case tracking-normal font-medium">Fotografii: Pexels, Faridvisuals (Pexels), Wolfgang Hasselmann (Unsplash)</p>
                 </div>
             </div>

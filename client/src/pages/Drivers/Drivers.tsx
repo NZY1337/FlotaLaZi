@@ -21,7 +21,7 @@ export default function Drivers() {
 
     return (
         <>
-            <PageMeta title="Șoferi - EuroTrack" description="Șoferi și actele lor." />
+            <PageMeta title="Șoferi - FlotaLaZi" description="Șoferi și actele lor." />
             <PageHeader
                 title="Șoferi"
                 subtitle="Permis, atestat, card tahograf, avize — cu alertă înainte de expirare."

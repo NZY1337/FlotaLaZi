@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Minus } from 'lucide-react';
 
 const faqs = [
-    { q: 'Trebuie să montez ceva în camion?', a: 'Nu. EuroTrack nu e GPS. Introduci datele o dată, din telefon sau calculator, și primești alertele pe email.' },
+    { q: 'Trebuie să montez ceva în camion?', a: 'Nu. FlotaLaZi nu e GPS. Introduci datele o dată, din telefon sau calculator, și primești alertele pe email.' },
     { q: 'Cum aflu că expiră un act?', a: 'În fiecare dimineață verificăm toate actele și îți trimitem un email cu ce expiră în 30, 7 sau 1 zi, în ziua expirării și a doua zi. Le vezi și în aplicație.' },
     { q: 'Pot urmări și actele șoferilor?', a: 'Da: permis, atestat profesional, card tahograf, avize medicale și psihologice — fiecare cu alertă proprie.' },
     { q: 'Am folosit aplicația „Flota Mea”. Pierd datele?', a: 'Nu. Faci backup din aplicația veche și îl încarci în Setări. Camioanele, actele și tranzacțiile se mută automat.' },

@@ -6,8 +6,8 @@ export default function ForgotPassword() {
     return (
         <>
             <PageMeta
-                title="Forgot Password | EuroTrack"
-                description="Request a password reset link for your EuroTrack account"
+                title="Forgot Password | FlotaLaZi"
+                description="Request a password reset link for your FlotaLaZi account"
             />
             <AuthLayout>
                 <ForgotPasswordForm />

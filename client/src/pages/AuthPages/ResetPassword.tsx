@@ -6,8 +6,8 @@ export default function ResetPassword() {
     return (
         <>
             <PageMeta
-                title="Reset Password | EuroTrack"
-                description="Set a new password for your EuroTrack account"
+                title="Reset Password | FlotaLaZi"
+                description="Set a new password for your FlotaLaZi account"
             />
             <AuthLayout>
                 <ResetPasswordForm />

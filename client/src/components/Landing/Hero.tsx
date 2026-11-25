@@ -47,7 +47,7 @@ export default function Hero() {
                         className="relative">
                         <div className="relative z-10 bg-black p-2 shadow-[8px_8px_0px_0px_#000000] transform -rotate-2">
                             <div className="relative aspect-square overflow-hidden">
-                                <img src={IMAGES.hero} alt="Camion EuroTrack pe drum" className="w-full h-full object-cover contrast-110" referrerPolicy="no-referrer" />
+                                <img src={IMAGES.hero} alt="Camion FlotaLaZi pe drum" className="w-full h-full object-cover contrast-110" referrerPolicy="no-referrer" />
                                 <div className="absolute bottom-0 left-0 right-0 bg-black p-4 flex items-center justify-between gap-4">
                                     <div>
                                         <p className="text-[10px] font-black uppercase text-[#7592ff] tracking-widest mb-1">Alertă · NT 08 RGT</p>

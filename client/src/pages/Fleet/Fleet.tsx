@@ -63,7 +63,7 @@ export default function Fleet() {
 
     return (
         <>
-            <PageMeta title="Flotă - EuroTrack" description="Camioane și remorci." />
+            <PageMeta title="Flotă - FlotaLaZi" description="Camioane și remorci." />
             <PageHeader
                 title="Flotă"
                 subtitle="Camioane, remorci și semiremorci."

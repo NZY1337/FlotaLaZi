@@ -53,7 +53,7 @@ export default function Settings() {
 
     return (
         <>
-            <PageMeta title="Setări - EuroTrack" description="Curs valutar, alerte și import date." />
+            <PageMeta title="Setări - FlotaLaZi" description="Curs valutar, alerte și import date." />
             <PageHeader title="Setări" subtitle="Curs valutar, alerte și importul datelor din aplicația veche." />
 
             {isError && <Alert variant="error" title="Eroare" message="Nu am putut încărca setările." />}

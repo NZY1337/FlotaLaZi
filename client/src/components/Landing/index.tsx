@@ -11,11 +11,11 @@ import CTA from './CTA';
 import Footer from './Footer';
 
 // Public landing page on "/". Same visual language as the old Streamloop
-// homepage (neo-brutalist, #465fff), rewritten for EuroTrack.
+// homepage (neo-brutalist, #465fff), rewritten for FlotaLaZi.
 export default function Landing() {
     return (
         <div className="bg-white text-black font-sans selection:bg-[#465fff] selection:text-white scroll-smooth overflow-x-hidden">
-            <PageMeta title="EuroTrack — acte, revizii și profit pentru flota ta" description="Alerte pentru ITP, RCA, rovinietă, tahograf și actele șoferilor. Pentru firme de transport din România." />
+            <PageMeta title="FlotaLaZi — acte, revizii și profit pentru flota ta" description="Alerte pentru ITP, RCA, rovinietă, tahograf și actele șoferilor. Pentru firme de transport din România." />
             <Navbar />
             <Hero />
             <DocumentStrip />

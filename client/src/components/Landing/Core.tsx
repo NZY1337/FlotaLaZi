@@ -35,7 +35,7 @@ export default function Core() {
                                 <h4 className="text-white font-black uppercase leading-none text-base md:text-xl">Profit pe<br />fiecare camion</h4>
                             </div>
                             <div className="bg-zinc-900 border-2 border-zinc-700 p-4 md:p-5 h-48 md:h-64 flex flex-col justify-center gap-3 font-mono text-[11px] md:text-xs">
-                                <p className="text-zinc-500 uppercase tracking-widest">EuroTrack · azi 08:00</p>
+                                <p className="text-zinc-500 uppercase tracking-widest">FlotaLaZi · azi 08:00</p>
                                 <p className="text-white">⚠ ITP — NT 08 RGT: expiră în 7 zile</p>
                                 <p className="text-white">⚠ Tahograf — NT 10 EUR: expiră în 20 zile</p>
                                 <p className="text-white">🛢 Ulei — NT 08 RGT: mai sunt 3.500 km</p>
@@ -45,7 +45,7 @@ export default function Core() {
                     <div className="order-1 lg:order-2">
                         <h2 className="text-3xl md:text-5xl font-extrabold mb-6 md:mb-8 leading-tight">Ca un secretar care nu uită nimic. Fără să-l plătești cu normă întreagă.</h2>
                         <p className="text-zinc-400 text-base md:text-lg mb-8 md:mb-10 leading-relaxed font-medium">
-                            Un act uitat înseamnă amendă, camion tras pe dreapta sau cursă pierdută. EuroTrack ține evidența pentru tine și te anunță singur — nu trebuie să deschizi aplicația ca să afli că ceva expiră.
+                            Un act uitat înseamnă amendă, camion tras pe dreapta sau cursă pierdută. FlotaLaZi ține evidența pentru tine și te anunță singur — nu trebuie să deschizi aplicația ca să afli că ceva expiră.
                         </p>
                         <ul className="space-y-4 md:space-y-6">
                             {['Acte pentru camioane, remorci, șoferi și firmă', 'Alerte zilnice pe email și în aplicație', 'Încasări și cheltuieli în lei și euro'].map((item) => (

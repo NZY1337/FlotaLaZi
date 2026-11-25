@@ -20,7 +20,7 @@ export default function Navbar() {
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
             <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-                <Link to="/" aria-label="EuroTrack"><Logo /></Link>
+                <Link to="/" aria-label="FlotaLaZi"><Logo /></Link>
 
                 <div className="hidden md:flex items-center gap-10 text-[13px] font-bold tracking-widest uppercase">
                     {links.map((l) => <a key={l.href} href={l.href} className="hover:text-gray-500 transition-colors">{l.label}</a>)}

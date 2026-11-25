@@ -43,7 +43,7 @@ function exportCsv(rows: Transaction[], plateOf: (id: string | null) => string) 
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `eurotrack-tranzactii-${toYmd(new Date())}.csv`;
+    a.download = `flotalazi-tranzactii-${toYmd(new Date())}.csv`;
     a.click();
     URL.revokeObjectURL(url);
 }
@@ -110,7 +110,7 @@ export default function Finance() {
 
     return (
         <>
-            <PageMeta title="Financiar - EuroTrack" description="Încasări, cheltuieli și profit pe camion." />
+            <PageMeta title="Financiar - FlotaLaZi" description="Încasări, cheltuieli și profit pe camion." />
             <PageHeader
                 title="Financiar"
                 subtitle="Profit pe lună și pe camion. Sumele în EUR sunt convertite la cursul din ziua înregistrării."

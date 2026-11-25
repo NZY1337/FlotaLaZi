@@ -18,7 +18,7 @@ const B = '22222222-2222-4222-8222-222222222222';
 
 const describeDb = process.env.E2E_DATABASE_URL ? describe : describe.skip;
 
-describeDb('EuroTrack API (e2e)', () => {
+describeDb('FlotaLaZi API (e2e)', () => {
     let app: INestApplication;
     let db: DataSource;
     const sendText = jest.fn().mockResolvedValue({});

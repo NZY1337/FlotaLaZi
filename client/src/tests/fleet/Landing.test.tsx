@@ -16,7 +16,7 @@ const renderLanding = () =>
     render(<HelmetProvider><MemoryRouter><Landing /></MemoryRouter></HelmetProvider>);
 
 describe("Landing page", () => {
-    it("pitches EuroTrack and sends visitors to sign-up", () => {
+    it("pitches FlotaLaZi and sends visitors to sign-up", () => {
         vi.mocked(useAppContext).mockReturnValue(buildAppContextValue({ session: null }));
         renderLanding();
 
