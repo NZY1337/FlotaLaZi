@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
+import { BrowserRouter as Router, Routes, Route } from "react-router";
 import SignIn from "./pages/AuthPages/SignIn";
 import SignUp from "./pages/AuthPages/SignUp";
 import ForgotPassword from "./pages/AuthPages/ForgotPassword";
@@ -11,6 +11,7 @@ import Documents from "./pages/Documents/Documents";
 import Drivers from "./pages/Drivers/Drivers";
 import Finance from "./pages/Finance/Finance";
 import Settings from "./pages/Settings/Settings";
+import Landing from "./components/Landing";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import RedirectIfAuthenticated from "./components/common/RedirectIfAuthenticated";
 
@@ -19,7 +20,7 @@ export default function App() {
         <>
             <Router>
                 <Routes>
-                    <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                    <Route path="/" element={<Landing />} />
 
                     <Route element={<ProtectedRoute />}>
                         <Route element={<AppLayout />}>

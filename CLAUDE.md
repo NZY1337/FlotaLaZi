@@ -80,7 +80,7 @@ No shared runtime, no shared code, no monorepo tooling.
 ```
 client/src/
   pages/         route-level screens (thin: compose hooks + components)
-  components/    reusable UI (auth, common, form, header, ui, fleet)
+  components/    reusable UI (auth, common, form, header, ui, fleet, Landing)
   hooks/         React Query hooks — one file per resource
   services/      fetch functions per resource (the API client layer)
   context/       session, theme, sidebar — don't add more
@@ -109,8 +109,10 @@ Routes:
 /settings    Setări       (EUR rate, alert thresholds, email alerts, import)
 ```
 
-`/` redirects to `/dashboard`; `ProtectedRoute` sends signed-out users to
-`/signin`.
+`/` is the public landing page (`components/Landing/`, same neo-brutalist
+style as the old Streamloop homepage; photos hotlinked from Pexels/Unsplash,
+credited in the footer, URLs in `Landing/images.ts`). `ProtectedRoute` sends
+signed-out users to `/signin` — never to `/`.
 
 ## 5. Backend architecture (`server/`)
 
