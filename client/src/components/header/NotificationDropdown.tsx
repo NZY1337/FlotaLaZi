@@ -8,11 +8,18 @@ function timeAgo(dateStr: string): string {
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return 'acum';
-    if (mins < 60) return `${mins} min ago`;
+    if (mins < 60) return `acum ${mins} min`;
     const hours = Math.floor(mins / 60);
-    if (hours < 24) return `${hours} hr ago`;
-    return `${Math.floor(hours / 24)} days ago`;
+    if (hours < 24) return `acum ${hours} h`;
+    const days = Math.floor(hours / 24);
+    return days === 1 ? 'ieri' : `acum ${days} zile`;
 }
+
+const typeLabel: Record<Notification['type'], string> = {
+    info: 'info',
+    warning: 'atenție',
+    error: 'urgent',
+};
 
 const typeDotClass: Record<Notification['type'], string> = {
     info: 'bg-blue-400',
@@ -31,7 +38,10 @@ export default function NotificationDropdown() {
     const closeDropdown = () => setIsOpen(false);
 
     return (
-        <div className="relative">
+        // Below lg the bell sits at the left of the header's second row, so the
+        // panel hangs from the header itself (the sticky <header> is its
+        // containing block) and spans the screen; from lg it hangs under the bell.
+        <div className="lg:relative">
             <button
                 className="relative flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full dropdown-toggle hover:text-gray-700 h-11 w-11 hover:bg-gray-100 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
                 onClick={handleToggle}
@@ -60,11 +70,11 @@ export default function NotificationDropdown() {
             <Dropdown
                 isOpen={isOpen}
                 onClose={closeDropdown}
-                className="absolute -right-[240px] mt-[17px] flex h-[480px] w-[350px] flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark sm:w-[361px] lg:right-0"
+                className="absolute left-3 right-3 top-full mt-2 flex h-[480px] max-h-[75vh] w-auto flex-col rounded-2xl border border-gray-200 bg-white p-3 shadow-theme-lg dark:border-gray-800 dark:bg-gray-dark sm:left-auto sm:w-[361px] lg:right-0 lg:top-auto lg:mt-[17px]"
             >
                 <div className="flex items-center justify-between pb-3 mb-3 border-b border-gray-100 dark:border-gray-700">
                     <h5 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-                        Notifications
+                        Notificări
                         {unreadCount > 0 && (
                             <span className="ml-2 inline-flex items-center justify-center h-5 w-5 rounded-full bg-orange-400 text-white text-xs font-bold">
                                 {unreadCount}
@@ -84,7 +94,7 @@ export default function NotificationDropdown() {
                 <ul className="flex flex-col h-auto overflow-y-auto custom-scrollbar">
                     {notifications.length === 0 && (
                         <li className="flex items-center justify-center py-10 text-sm text-gray-400 dark:text-gray-500">
-                            No notifications
+                            Nicio notificare
                         </li>
                     )}
                     {notifications.map((notification) => (
@@ -103,7 +113,7 @@ export default function NotificationDropdown() {
                                         {notification.message}
                                     </span>
                                     <span className="flex items-center gap-2 mt-1 text-xs text-gray-400 dark:text-gray-500">
-                                        <span className="capitalize">{notification.type}</span>
+                                        <span>{typeLabel[notification.type]}</span>
                                         <span className="w-1 h-1 bg-gray-400 rounded-full" />
                                         <span>{timeAgo(notification.created_at)}</span>
                                     </span>
