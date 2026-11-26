@@ -39,7 +39,7 @@ export default function Hero() {
                                 Cum funcționează
                             </a>
                         </motion.div>
-                        <p className="mt-6 text-xs font-bold uppercase tracking-widest text-gray-400">Primele 2 camioane gratuit · fără card · fără GPS de montat</p>
+                        <p className="mt-6 text-xs font-bold uppercase tracking-widest text-gray-400">Un camion gratuit · fără card · fără GPS de montat</p>
                     </div>
 
                     <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}>
