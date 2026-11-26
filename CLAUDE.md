@@ -352,7 +352,8 @@ free):
 Set against FlotaDesk (the closest competitor: 39 / 89 / 179 RON per month for
 5 / 10 / unlimited vehicles, 14-day trial, email-only alerts). There is **no
 billing yet**: plans are not enforced in the app and everyone uses it for
-free. When billing is built, count trucks only and keep the 1-truck plan free.
+free — the pricing section says so ("În perioada de testare … gratuit",
+prices "de la lansare"); remove that note when billing ships. When billing is built, count trucks only and keep the 1-truck plan free.
 Don't advertise a feature on the landing before it exists — mark it
 "(în curând)".
 
