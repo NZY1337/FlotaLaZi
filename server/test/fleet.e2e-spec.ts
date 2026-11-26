@@ -1,5 +1,7 @@
 import 'dotenv/config';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
+import type { NestExpressApplication } from '@nestjs/platform-express';
+import { configureApp } from '../src/http-setup';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { DataSource } from 'typeorm';
@@ -48,9 +50,8 @@ describeDb('FlotaLaZi API (e2e)', () => {
             .useValue({ sendWelcomeEmail, sendText })
             .compile();
 
-        app = moduleRef.createNestApplication();
-        app.setGlobalPrefix('api');
-        app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+        app = moduleRef.createNestApplication<NestExpressApplication>();
+        configureApp(app as NestExpressApplication);
         await app.init();
         db = moduleRef.get(DataSource);
         await db.query(`TRUNCATE documents, transactions, drivers, fleet_settings, notifications, users CASCADE`);
@@ -383,6 +384,108 @@ describeDb('FlotaLaZi API (e2e)', () => {
     it('no longer serves another user\'s profile by id', async () => {
         await request(app.getHttpServer()).get(`/api/user/${A}`).expect(404);
         await as(B).get(`/user/${A}`).expect(404);
+    });
+
+    it('isolates owners on every route: another owner gets 404 and changes nothing', async () => {
+        const X = '99999999-9999-4999-8999-999999999991';
+        const Y = '99999999-9999-4999-8999-999999999992';
+        const day = todayYmd();
+
+        // X's fleet: one of everything.
+        const trailer = (await as(X).post('/vehicles', { kind: 'TRAILER', plate: 'XX 01 TRL' }).expect(201)).body.id;
+        const truck = (await as(X).post('/vehicles', { kind: 'TRUCK', plate: 'XX 02 TRK', km: 1000, attachedTrailerId: trailer }).expect(201)).body.id;
+        const driver = (await as(X).post('/drivers', { name: 'Șofer X' }).expect(201)).body.id;
+        const docV = (await as(X).post('/documents', { type: 'ITP', expiresOn: addDays(day, 5), alertDays: 30, vehicleId: truck }).expect(201)).body.id;
+        const docD = (await as(X).post('/documents', { type: 'Permis de conducere', expiresOn: addDays(day, 5), alertDays: 30, driverId: driver }).expect(201)).body.id;
+        const tx = (await as(X).post('/transactions', { type: 'INCOME', date: day, amount: 1000, currency: 'RON', category: 'Transport / Cursă', vehicleId: truck }).expect(201)).body.id;
+        const note = (await as(X).post('/notifications', { type: 'info', message: 'pentru X' }).expect(201)).body.id;
+        const snapshot = async () => ({
+            vehicles: (await as(X).get('/vehicles').expect(200)).body,
+            drivers: (await as(X).get('/drivers').expect(200)).body,
+            documents: (await as(X).get('/documents').expect(200)).body,
+            transactions: (await as(X).get('/transactions').expect(200)).body,
+            notifications: (await as(X).get('/notifications').expect(200)).body,
+        });
+        const before = await snapshot();
+
+        // Y's own truck and driver, to try attaching X's things to.
+        const yTruck = (await as(Y).post('/vehicles', { kind: 'TRUCK', plate: 'YY 01 TRK' }).expect(201)).body.id;
+        const yDriver = (await as(Y).post('/drivers', { name: 'Șofer Y' }).expect(201)).body.id;
+        const yDoc = (await as(Y).post('/documents', { type: 'ITP', expiresOn: addDays(day, 50), alertDays: 30, vehicleId: yTruck }).expect(201)).body.id;
+        const yTx = (await as(Y).post('/transactions', { type: 'EXPENSE', date: day, amount: 5, currency: 'RON', category: 'Altele' }).expect(201)).body.id;
+
+        // 1. Y cannot read, change or delete any of X's records.
+        await as(Y).patch(`/vehicles/${truck}`, { km: 1 }).expect(404);
+        await as(Y).patch(`/vehicles/${trailer}`, { plate: 'HACK' }).expect(404);
+        await as(Y).post(`/vehicles/${truck}/oil-change`, { km: 2000, date: day }).expect(404);
+        await as(Y).delete(`/vehicles/${truck}`).expect(404);
+        await as(Y).delete(`/vehicles/${trailer}`).expect(404);
+        await as(Y).patch(`/drivers/${driver}`, { name: 'HACK' }).expect(404);
+        await as(Y).delete(`/drivers/${driver}`).expect(404);
+        await as(Y).patch(`/documents/${docV}`, { expiresOn: addDays(day, 900) }).expect(404);
+        await as(Y).delete(`/documents/${docV}`).expect(404);
+        await as(Y).delete(`/documents/${docD}`).expect(404);
+        await as(Y).patch(`/transactions/${tx}`, { amount: 1 }).expect(404);
+        await as(Y).delete(`/transactions/${tx}`).expect(404);
+        await as(Y).patch(`/notifications/${note}/read`, {}).expect(404);
+        await as(Y).delete(`/notifications/${note}`).expect(404);
+
+        // 2. Y cannot point its own records at X's ids.
+        await as(Y).post('/vehicles', { kind: 'TRUCK', plate: 'YY 02 TRK', attachedTrailerId: trailer }).expect(404);
+        await as(Y).patch(`/vehicles/${yTruck}`, { attachedTrailerId: trailer }).expect(404);
+        await as(Y).post('/documents', { type: 'ITP', expiresOn: addDays(day, 5), vehicleId: truck }).expect(404);
+        await as(Y).post('/documents', { type: 'Permis de conducere', expiresOn: addDays(day, 5), driverId: driver }).expect(404);
+        await as(Y).patch(`/documents/${yDoc}`, { vehicleId: truck }).expect(404);
+        await as(Y).post('/transactions', { type: 'EXPENSE', date: day, amount: 5, currency: 'RON', category: 'Altele', vehicleId: truck }).expect(404);
+        await as(Y).patch(`/transactions/${yTx}`, { vehicleId: truck }).expect(404);
+
+        // 3. Y's lists, filters, summary and dashboard show nothing of X.
+        const yVehicles = (await as(Y).get('/vehicles').expect(200)).body;
+        expect(yVehicles.map((v: { id: string }) => v.id)).toEqual([yTruck]);
+        expect((await as(Y).get('/drivers').expect(200)).body.map((d: { id: string }) => d.id)).toEqual([yDriver]);
+        expect((await as(Y).get('/documents').expect(200)).body.map((d: { id: string }) => d.id)).toEqual([yDoc]);
+        expect((await as(Y).get(`/transactions?vehicleId=${truck}`).expect(200)).body).toEqual([]);
+        expect((await as(Y).get(`/transactions/summary?vehicleId=${truck}`).expect(200)).body.totals).toMatchObject({ income: 0, expense: 0 });
+        expect((await as(Y).get('/notifications').expect(200)).body).toEqual([]);
+        expect(JSON.stringify((await as(Y).get('/dashboard').expect(200)).body)).not.toMatch(/XX 0|Șofer X/);
+
+        // 4. Ids that are not even UUIDs: refused (400 or 404), never a server error.
+        for (const [method, url] of [
+            ['patch', '/vehicles/nu-e-un-id'], ['delete', '/vehicles/nu-e-un-id'], ['post', '/vehicles/nu-e-un-id/oil-change'],
+            ['patch', '/drivers/nu-e-un-id'], ['delete', '/drivers/nu-e-un-id'],
+            ['patch', '/documents/nu-e-un-id'], ['delete', '/documents/nu-e-un-id'],
+            ['patch', '/transactions/nu-e-un-id'], ['delete', '/transactions/nu-e-un-id'],
+            ['patch', '/notifications/nu-e-un-id/read'], ['delete', '/notifications/nu-e-un-id'],
+        ] as const) {
+            const res = await (method === 'delete' ? as(Y).delete(url) : method === 'post' ? as(Y).post(url, { km: 1, date: day }) : as(Y).patch(url, { km: 1 }));
+            expect([url, [400, 404].includes(res.status)]).toEqual([url, true]);
+        }
+
+        // 5. And X's data is exactly as it was.
+        expect(await snapshot()).toEqual(before);
+    });
+
+    it('only lets the app\'s own sites call the API from a browser, with security headers', async () => {
+        const preflight = (origin: string) => request(app.getHttpServer()).options('/api/vehicles')
+            .set('Origin', origin).set('Access-Control-Request-Method', 'GET');
+        expect((await preflight('https://www.flotalazi.ro')).headers['access-control-allow-origin']).toBe('https://www.flotalazi.ro');
+        expect((await preflight('http://localhost:5173')).headers['access-control-allow-origin']).toBe('http://localhost:5173');
+        expect((await preflight('https://evil.example')).headers['access-control-allow-origin']).toBeUndefined();
+
+        const res = await as(A).get('/settings').expect(200);
+        expect(res.headers['x-content-type-options']).toBe('nosniff');
+        expect(res.headers['x-powered-by']).toBeUndefined();
+    });
+
+    it('rate-limits per session: a script cannot hammer the old-backup import', async () => {
+        const Z = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+        for (let i = 0; i < 5; i++) {
+            const res = await as(Z).post('/import/legacy', {});
+            expect(res.status).not.toBe(429);
+        }
+        await as(Z).post('/import/legacy', {}).expect(429);
+        // Another account is not affected by Z's limit.
+        expect((await as('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb').post('/import/legacy', {})).status).not.toBe(429);
     });
 
     it('deleting a truck removes its documents and keeps its transactions', async () => {

@@ -1,4 +1,4 @@
-import { IsString, IsIn } from 'class-validator';
+import { IsString, IsIn, MaxLength } from 'class-validator';
 import { type NotificationType } from '../../utils/constants';
 
 export class CreateNotificationDto {
@@ -7,6 +7,7 @@ export class CreateNotificationDto {
     type: NotificationType;
 
     @IsString()
+    @MaxLength(500)
     message: string;
 }
 
