@@ -1,3 +1,5 @@
+import { useEffect, useState } from 'react';
+import { animate, motion, useReducedMotion } from 'framer-motion';
 import { BellRing, Mail, TrendingUp } from 'lucide-react';
 import { IMAGES } from './images';
 
@@ -5,6 +7,11 @@ import { IMAGES } from './images';
 // on a phone in front, and the two things the owner gets without opening the
 // app — the 08:00 email and the profit per truck. All drawn in code (sharp at
 // any size, no image to load) with the landing's neo-brutalist style.
+//
+// Motion, once on load: the oil bar fills, the 08:00 email slides in, the
+// profit counts up and its bars rise. Then only small loops: the red dot
+// pulses and the two cards float. People who ask their system for reduced
+// motion get the final, still picture.
 
 const alerts = [
     { dot: 'bg-red-500', tone: 'text-red-600', title: 'ITP', plate: 'NT 08 RGT', when: 'expiră mâine' },
@@ -14,8 +21,27 @@ const alerts = [
 ];
 
 const bars = [38, 52, 46, 64, 58, 80];
+const PROFIT = 18_450;
+
+/** Counts from 0 to `to` once, after `delay` seconds; shows `to` at once when motion is reduced. */
+function useCountUp(to: number, delay: number, still: boolean) {
+    const [value, setValue] = useState(still ? to : 0);
+    useEffect(() => {
+        if (still) { setValue(to); return; }
+        const controls = animate(0, to, { duration: 1.4, delay, ease: 'easeOut', onUpdate: (v) => setValue(Math.round(v)) });
+        return () => controls.stop();
+    }, [to, delay, still]);
+    return value;
+}
 
 export default function HeroMockup() {
+    const still = !!useReducedMotion();
+    const profit = useCountUp(PROFIT, 1.6, still);
+    // `initial={false}` renders the end state straight away.
+    const from = <T,>(start: T) => (still ? false : start);
+    const float = (dy: number, duration: number) =>
+        still ? undefined : { y: [0, dy, 0], transition: { duration, repeat: Infinity, ease: 'easeInOut' as const, delay: 2.6 } };
+
     return (
         <div className="relative mx-auto w-full max-w-[540px] pt-6 sm:pt-10 sm:pb-6">
             {/* The truck photo, as before, now the backdrop. */}
@@ -46,7 +72,10 @@ export default function HeroMockup() {
                         <ul className="space-y-1.5">
                             {alerts.map((a) => (
                                 <li key={a.title + a.plate} className="flex items-center gap-2 rounded-lg border border-gray-200 px-2.5 py-2">
-                                    <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${a.dot}`} />
+                                    <span className="relative flex h-2.5 w-2.5 shrink-0">
+                                        {a.title === 'ITP' && !still && <span className={`absolute inline-flex h-full w-full animate-ping rounded-full opacity-60 ${a.dot}`} />}
+                                        <span className={`relative h-2.5 w-2.5 rounded-full ${a.dot}`} />
+                                    </span>
                                     <div className="min-w-0 flex-1">
                                         <p className="truncate text-[11px] font-bold text-black">{a.title}</p>
                                         <p className="truncate text-[10px] text-gray-500">{a.plate}</p>
@@ -62,7 +91,8 @@ export default function HeroMockup() {
                                 <span className="font-bold text-amber-600">mai sunt 3.000 km</span>
                             </div>
                             <div className="h-1.5 overflow-hidden rounded-full bg-gray-100">
-                                <div className="h-full w-[88%] rounded-full bg-amber-400" />
+                                <motion.div className="h-full rounded-full bg-amber-400"
+                                    initial={from({ width: '0%' })} animate={{ width: '88%' }} transition={{ duration: 1.2, delay: 0.9, ease: 'easeOut' }} />
                             </div>
                         </div>
                     </div>
@@ -70,7 +100,9 @@ export default function HeroMockup() {
             </div>
 
             {/* The 08:00 email. */}
-            <div className="relative z-20 -mt-6 ml-auto w-[85%] border-2 border-black bg-white p-3 shadow-[6px_6px_0px_0px_#000000] sm:absolute sm:right-0 sm:top-[16%] sm:mt-0 sm:w-[44%]">
+            <motion.div className="relative z-20 -mt-6 ml-auto w-[85%] sm:absolute sm:right-0 sm:top-[16%] sm:mt-0 sm:w-[44%]"
+                initial={from({ opacity: 0, x: 40 })} animate={{ opacity: 1, x: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 1.2 }}>
+            <motion.div className="border-2 border-black bg-white p-3 shadow-[6px_6px_0px_0px_#000000]" animate={float(-6, 4)}>
                 <div className="mb-1.5 flex items-center gap-2">
                     <div className="flex h-6 w-6 items-center justify-center bg-[#465fff]">
                         <Mail className="h-3.5 w-3.5 text-white" />
@@ -79,22 +111,27 @@ export default function HeroMockup() {
                 </div>
                 <p className="text-sm font-black leading-snug text-black">FlotaLaZi: ITP NT 08 RGT expiră mâine</p>
                 <p className="mt-1 text-[11px] text-gray-500">Te anunțăm noi. Nu trebuie să deschizi aplicația.</p>
-            </div>
+            </motion.div>
+            </motion.div>
 
             {/* Profit per truck. */}
-            <div className="relative z-20 mt-4 mr-4 ml-auto w-[75%] border-2 border-black bg-black p-3 text-white shadow-[6px_6px_0px_0px_#465fff] sm:absolute sm:bottom-6 sm:right-0 sm:mt-0 sm:mr-0 sm:w-[44%]">
+            <motion.div className="relative z-20 mt-4 mr-4 ml-auto w-[75%] sm:absolute sm:bottom-6 sm:right-0 sm:mt-0 sm:mr-0 sm:w-[44%]"
+                initial={from({ opacity: 0, y: 30 })} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 1.5 }}>
+            <motion.div className="border-2 border-black bg-black p-3 text-white shadow-[6px_6px_0px_0px_#465fff]" animate={float(5, 5)}>
                 <div className="flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase tracking-widest text-[#7592ff]">Profit · noiembrie</span>
                     <TrendingUp className="h-4 w-4 text-emerald-400" />
                 </div>
-                <p className="mt-1 text-xl font-black">+18.450 lei</p>
+                <p className="mt-1 text-xl font-black tabular-nums">+{profit.toLocaleString('ro-RO')} lei</p>
                 <p className="text-[10px] text-gray-400">NT 08 RGT · încasări − cheltuieli</p>
                 <div className="mt-2 flex h-8 items-end gap-1">
                     {bars.map((h, i) => (
-                        <div key={i} className={`flex-1 ${i === bars.length - 1 ? 'bg-[#465fff]' : 'bg-white/25'}`} style={{ height: `${h}%` }} />
+                        <motion.div key={i} className={`flex-1 ${i === bars.length - 1 ? 'bg-[#465fff]' : 'bg-white/25'}`}
+                            initial={from({ height: '0%' })} animate={{ height: `${h}%` }} transition={{ duration: 0.5, delay: 1.7 + i * 0.12, ease: 'easeOut' }} />
                     ))}
                 </div>
-            </div>
+            </motion.div>
+            </motion.div>
         </div>
     );
 }
