@@ -5,8 +5,9 @@ implementing anything. When in doubt, prefer whatever this file says over a
 "cleaner"-looking alternative.
 
 > History: this codebase started as Streamloop (an n8n automation-business
-> portal), became EuroTrack in PR #4 (repo now `NZY1337/FlotaMea`) and was
-> renamed **FlotaLaZi** (domain `flotalazi.ro`) in PR #13.
+> portal), became EuroTrack in PR #4 and was renamed **FlotaLaZi** (domain
+> `flotalazi.ro`) in PR #13; the repo is `NZY1337/FlotaLaZi` (formerly
+> `NZY1337/FlotaMea` — GitHub still redirects the old name).
 > Auth, the UI shell, notifications and email were kept; the commerce/n8n
 > domain was removed. Streamloop's last state is commit `de43723`.
 
@@ -119,6 +120,38 @@ Routes:
 style as the old Streamloop homepage; photos hotlinked from Pexels/Unsplash,
 credited in the footer, URLs in `Landing/images.ts`). `ProtectedRoute` sends
 signed-out users to `/signin` — never to `/`.
+
+Landing details:
+
+- The hero's product shot (`HeroMockup.tsx`) is drawn in code, not an image:
+  the dashboard on a phone, the 08:00 email and the profit card. Animations
+  use framer-motion and always respect `useReducedMotion()` (reduced motion =
+  the final, still picture). Scroll-in animations use `whileInView` with
+  `viewport={{ once: true }}` (see `Core.tsx`).
+- Prices live in `Pricing.tsx` only (and §10 below); the FAQ, hero and CTA
+  mention the free plan in words — keep them in step.
+- SEO: title, description, canonical and Open Graph tags are in
+  `client/index.html` itself (crawlers and WhatsApp/Facebook previews don't
+  run JS); `public/og-image.png` (1200×630) is the link preview,
+  `public/robots.txt` keeps the logged-in pages out, `public/sitemap.xml`
+  lists `/` and `/signup` (submitted in Google Search Console — the
+  `flotalazi.ro` Domain property, verified by a TXT record at Netim).
+  `PageMeta` (react-helmet-async) only changes the **title**: its
+  description never reaches the page with React 19, so the description in
+  `index.html` is the site's description.
+
+Form inputs (`components/fleet/ui.tsx`) — use these, never a native
+`type="number"` or `type="date"` input:
+
+- `NumberField`: numbers typed the Romanian way ("1.500", "1.500,50", "12,5";
+  a native number input reads "1.500" as 1.5), parsed by `parseNumberInput`.
+- `DateField`: dates shown and typed as zz.ll.aaaa whatever the browser's
+  language (a native date input shows mm/dd/yyyy on an English browser),
+  with a calendar button that opens the browser's own picker; value stays
+  `YYYY-MM-DD`, limited to 2000–2099 like the server.
+- `SelectField`, `TextField` for the rest; document types offered in the
+  form are `DOCUMENT_TYPES` / `DRIVER_DOCUMENT_TYPES` in `helpers/fleet.ts`
+  (the type is free text, so the list is only a convenience).
 
 ## 5. Backend architecture (`server/`)
 
@@ -305,7 +338,23 @@ belong to the same owner before use.
 4. Drivers report via WhatsApp (odometer, fuel receipt photo).
 5. Monthly export for the accountant (CSV/PDF).
 
-Pricing to test: ~5–8 € per truck per month, first 2 trucks free.
+Pricing (in lei, per firm, by number of **trucks** — trailers, drivers and
+documents are unlimited; every feature is in every plan; yearly = 2 months
+free):
+
+| Plan    | Trucks     | Monthly  | Yearly    |
+|---------|------------|----------|-----------|
+| Gratuit | 1          | 0        | 0         |
+| Mic     | up to 5    | 39 lei   | 390 lei   |
+| Flotă   | up to 10   | 79 lei   | 790 lei   |
+| Mare    | unlimited  | 149 lei  | 1.490 lei |
+
+Set against FlotaDesk (the closest competitor: 39 / 89 / 179 RON per month for
+5 / 10 / unlimited vehicles, 14-day trial, email-only alerts). There is **no
+billing yet**: plans are not enforced in the app and everyone uses it for
+free. When billing is built, count trucks only and keep the 1-truck plan free.
+Don't advertise a feature on the landing before it exists — mark it
+"(în curând)".
 
 ## 11. Development workflow
 
@@ -325,7 +374,9 @@ Pricing to test: ~5–8 € per truck per month, first 2 trucks free.
   a domain verified in Resend — without it Resend's test sender only reaches
   the Resend account owner), `GMAIL_USERNAME`, `GMAIL_APP_PASSWORD` (local
   dev email), `APP_URL`, `PORT`, `ALLOWED_ORIGINS` (optional, comma-separated
-  browser origins allowed by CORS).
+  browser origins allowed by CORS). A Railway variable's value is only the
+  value: `MAIL_FROM` = `FlotaLaZi <alerte@flotalazi.ro>` (once it held
+  `MAIL_FROM = FlotaLaZi …`, which became the sender's name).
   Env (client): `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY`,
   `VITE_BACKEND_URL` (defaults to `http://localhost:3010/api`).
 - Deploy: `client/` → Vercel (root `client`, `vercel.json` rewrites every
@@ -336,11 +387,19 @@ Pricing to test: ~5–8 € per truck per month, first 2 trucks free.
   sleeps: the 08:00 reminder cron must run. Migrations are run by hand
   (`npm run migration:run` with the production `DATABASE_URL`) before
   deploying a schema change.
+- Domain and accounts: `flotalazi.ro` is registered at Netim (DNS there:
+  Vercel, Resend's records, the Google Search Console TXT; apex redirects to
+  `www`). Plans: Railway needs Hobby ($5/month) — its free tier sleeps and
+  the cron would stop; Vercel Hobby is free but non-commercial, so move to
+  Pro once customers pay; Supabase and Resend free tiers are enough for now
+  (Resend free: 100 emails/day — one digest per owner per day).
 - When a change touches both sides, land the backend endpoint/DTO first.
 - CI: `.github/workflows/ci.yml` runs the server build, unit tests and API
   tests (against a Postgres service container, migrated first) and the client
   tests and build on every pull request and push to `main`. Merge only green.
-  Dependabot (`.github/dependabot.yml`) opens weekly update PRs per folder.
+  Dependabot (`.github/dependabot.yml`) opens weekly update PRs per folder:
+  merge the green ones one at a time; a red one is usually a major version
+  that needs code changes — close it and upgrade on purpose in its own PR.
   Known and accepted: 3 moderate advisories in TypeORM 0.3's `glob`/`minimatch`
   (fixed only in TypeORM 1.x; used with fixed patterns at startup).
 - Tests: `server` → `npm test` (jest, unit) and

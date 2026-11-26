@@ -4,10 +4,11 @@ import { Plus, Minus } from 'lucide-react';
 
 const faqs = [
     { q: 'Trebuie să montez ceva în camion?', a: 'Nu. FlotaLaZi nu e GPS. Introduci datele o dată, din telefon sau calculator, și primești alertele pe email.' },
-    { q: 'Cum aflu că expiră un act?', a: 'În fiecare dimineață verificăm toate actele și îți trimitem un email cu ce expiră în 30, 7 sau 1 zi, în ziua expirării și a doua zi. Le vezi și în aplicație.' },
+    { q: 'Cum aflu că expiră un act?', a: 'În fiecare dimineață la 8 verificăm toate actele. Primești un email cu 30 de zile înainte (sau câte zile alegi), apoi cu 7 zile, cu o zi, în ziua expirării și a doua zi. Dacă actul rămâne expirat, îți amintim o dată pe săptămână până îl reînnoiești. Le vezi și în aplicație.' },
     { q: 'Pot urmări și actele șoferilor?', a: 'Da: permis, atestat profesional, card tahograf, avize medicale și psihologice — fiecare cu alertă proprie.' },
     { q: 'Am folosit aplicația „Flota Mea”. Pierd datele?', a: 'Nu. Faci backup din aplicația veche și îl încarci în Setări. Camioanele, actele și tranzacțiile se mută automat.' },
-    { q: 'Pot anula oricând?', a: 'Da, fără perioadă minimă. Primele 2 camioane rămân gratuite.' },
+    { q: 'Remorcile se plătesc?', a: 'Nu. Plătești doar după numărul de camioane. Remorcile, șoferii și actele sunt nelimitate în orice plan.' },
+    { q: 'Pot anula oricând?', a: 'Da, fără perioadă minimă și fără contract. Un camion rămâne gratuit pentru totdeauna.' },
 ];
 
 export default function Faq() {

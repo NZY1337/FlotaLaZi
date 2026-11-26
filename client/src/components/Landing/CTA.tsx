@@ -11,7 +11,7 @@ export default function CTA() {
                         <span className="text-[#7592ff]">să ținem minte termenele.</span>
                     </h2>
                     <p className="text-xl md:text-2xl text-white/60 mb-12 max-w-2xl mx-auto font-medium">
-                        Adaugă primele camioane în 10 minute. Primele 2 sunt gratuite, pentru totdeauna.
+                        Adaugă camioanele în 10 minute. Primul camion e gratuit, pentru totdeauna.
                     </p>
                     <Link to="/signup" className="inline-block bg-[#465fff] text-white px-12 py-6 font-black uppercase tracking-tight text-2xl shadow-[4px_4px_0px_0px_#000000] hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-[12px_12px_0px_0px_rgba(255,255,255,1)] transition-all">
                         Începe gratuit
