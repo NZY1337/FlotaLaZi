@@ -130,10 +130,22 @@ export default function HeroMockup() {
                 <p className="mt-1 text-xl font-black tabular-nums">+{profit.toLocaleString('ro-RO')} lei</p>
                 <p className="text-[10px] text-gray-400">NT 08 RGT · încasări − cheltuieli</p>
                 <div className="mt-2 flex h-8 items-end gap-1">
-                    {bars.map((h, i) => (
-                        <motion.div key={i} className={`flex-1 ${i === bars.length - 1 ? 'bg-[#465fff]' : 'bg-white/25'}`}
-                            initial={from({ height: '0%' })} animate={{ height: `${h}%` }} transition={{ duration: 0.5, delay: 1.7 + i * 0.12, ease: 'easeOut' }} />
-                    ))}
+                    {bars.map((h, i) => {
+                        const last = i === bars.length - 1;
+                        // The column grows from the bottom once; inside it the bar
+                        // keeps breathing between its height and a little above, each
+                        // on its own rhythm. This month's (blue) bar reaches the top.
+                        const peak = last ? 100 : Math.min(h + 14, 95);
+                        return (
+                            <motion.div key={i} className="flex h-full flex-1 items-end" style={{ transformOrigin: 'bottom' }}
+                                initial={from({ scaleY: 0 })} animate={{ scaleY: 1 }} transition={{ duration: 0.5, delay: 1.7 + i * 0.12, ease: 'easeOut' }}>
+                                <motion.div className={`w-full ${last ? 'bg-[#465fff]' : 'bg-white/25'}`}
+                                    style={{ height: `${h}%` }}
+                                    animate={still ? undefined : { height: [`${h}%`, `${peak}%`] }}
+                                    transition={{ duration: 1.6 + (i % 3) * 0.5, ease: 'easeInOut', repeat: Infinity, repeatType: 'mirror', delay: 2.4 + i * 0.2 }} />
+                            </motion.div>
+                        );
+                    })}
                 </div>
             </motion.div>
             </motion.div>
