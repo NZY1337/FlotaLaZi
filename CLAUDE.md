@@ -224,8 +224,11 @@ their documents.
   `≤ alertDays` → **yellow**, else **green**.
 - Oil: red when `km ≥ lastOilKm + oilIntervalKm` or the months interval has
   passed; yellow when within `oilAlertKm` km or 30 days; else green.
-- Reminders send a document alert on the days where `daysLeft` is
-  `alertDays`, 7, 1, 0 or −1, at most once per day (`lastAlertedOn`). Oil
+- Reminders (`shouldAlertDocument`) send a document alert at most once per
+  day (`lastAlertedOn`): the first one as soon as the document is inside its
+  window (`daysLeft ≤ alertDays` and not alerted since the window opened — so
+  a document added or renewed late is caught up at once), then on days 7, 1,
+  0 and −1, then weekly while it stays expired, until renewed or deleted. Oil
   alerts at most once every 7 days while yellow/red. One digest per owner per
   run: one in-app notification per item + one email.
 - `POST /reminders/test` ("Trimite-mi alertele acum" in Setări) sends the

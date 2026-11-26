@@ -108,15 +108,47 @@ describe('oilStatus', () => {
 
 describe('reminder rules', () => {
     const today = '2026-11-25';
-    it('alerts documents only on threshold days, once per day', () => {
-        expect(shouldAlertDocument(30, 30, null, today)).toBe(true);
-        expect(shouldAlertDocument(7, 30, null, today)).toBe(true);
-        expect(shouldAlertDocument(1, 30, null, today)).toBe(true);
-        expect(shouldAlertDocument(0, 30, null, today)).toBe(true);
-        expect(shouldAlertDocument(-1, 30, null, today)).toBe(true);
-        expect(shouldAlertDocument(12, 30, null, today)).toBe(false);
-        expect(shouldAlertDocument(-5, 30, null, today)).toBe(false);
-        expect(shouldAlertDocument(7, 30, today, today)).toBe(false);
+    // A document expiring `days` from today, alert window 30 days.
+    const exp = (days: number) => addDays(today, days);
+    const alert = (days: number, lastAlertedOn: string | null, alertDays = 30) => shouldAlertDocument(exp(days), alertDays, lastAlertedOn, today);
+
+    it('sends the first alert on the first day of the warning window', () => {
+        expect(alert(31, null)).toBe(false);
+        expect(alert(30, null)).toBe(true);
+        expect(alert(10, null, 10)).toBe(true);
+    });
+
+    it('catches up at once on a document added (or renewed) inside its window', () => {
+        expect(alert(20, null)).toBe(true);
+        expect(alert(3, null)).toBe(true);
+        expect(alert(-20, null)).toBe(true);
+        // Alerted for an earlier window (before alertDays was lowered): a new first alert.
+        expect(alert(10, exp(-20), 10)).toBe(true);
+    });
+
+    it('after the first alert, repeats only on days 7, 1, 0 and -1', () => {
+        // The first alert went out on day 30 of a document now `days` from expiry.
+        const afterFirst = (days: number) => alert(days, addDays(exp(days), -30));
+        expect(afterFirst(29)).toBe(false);
+        expect(afterFirst(12)).toBe(false);
+        expect(afterFirst(7)).toBe(true);
+        expect(afterFirst(6)).toBe(false);
+        expect(afterFirst(1)).toBe(true);
+        expect(afterFirst(0)).toBe(true);
+        expect(afterFirst(-1)).toBe(true);
+    });
+
+    it('reminds an expired document weekly until it is renewed', () => {
+        expect(alert(-5, addDays(today, -4))).toBe(false); // alerted on day -1
+        expect(alert(-8, addDays(today, -7))).toBe(true);
+        expect(alert(-40, addDays(today, -6))).toBe(false);
+        expect(alert(-40, addDays(today, -7))).toBe(true);
+    });
+
+    it('never alerts twice on the same day', () => {
+        expect(alert(30, today)).toBe(false);
+        expect(alert(7, today)).toBe(false);
+        expect(alert(-8, today)).toBe(false);
     });
 
     it('alerts oil at most weekly while not green', () => {

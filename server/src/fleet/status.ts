@@ -1,4 +1,4 @@
-import { addMonths, daysBetween } from './dates';
+import { addDays, addMonths, daysBetween } from './dates';
 
 // The single place where expiry / oil status is decided (CLAUDE.md §7).
 
@@ -61,13 +61,25 @@ export function oilStatus(v: OilInput, oilAlertKm: number, today: string): OilSt
     return { configured: hasKm || hasDate, nextKm, kmLeft, dueDate, daysLeft, usedPct, level };
 }
 
-/** Reminder thresholds for documents: alertDays, 7, 1, 0 (today) and −1 (just expired). */
-export function isDocumentAlertDay(daysLeft: number, alertDays: number): boolean {
-    return daysLeft === alertDays || daysLeft === 7 || daysLeft === 1 || daysLeft === 0 || daysLeft === -1;
-}
+/** While a document stays expired, it is reminded again this often. */
+export const EXPIRED_REMINDER_EVERY_DAYS = 7;
 
-export function shouldAlertDocument(daysLeft: number, alertDays: number, lastAlertedOn: string | null, today: string): boolean {
-    return isDocumentAlertDay(daysLeft, alertDays) && lastAlertedOn !== today;
+/**
+ * Whether the daily run should alert this document today (at most once a day):
+ * - the first alert as soon as the document is inside its warning window
+ *   (`alertDays` before expiry) — also when it was added or renewed late,
+ *   so nobody waits for the next fixed day;
+ * - then on the fixed days 7, 1, 0 (today) and −1 (just expired);
+ * - then weekly while it stays expired, until the owner renews or deletes it.
+ */
+export function shouldAlertDocument(expiresOn: string, alertDays: number, lastAlertedOn: string | null, today: string): boolean {
+    if (lastAlertedOn === today) return false;
+    const daysLeft = daysBetween(today, expiresOn);
+    if (daysLeft > alertDays) return false;
+    const windowStart = addDays(expiresOn, -alertDays);
+    if (lastAlertedOn === null || lastAlertedOn < windowStart) return true;
+    if (daysLeft === 7 || daysLeft === 1 || daysLeft === 0 || daysLeft === -1) return true;
+    return daysLeft < 0 && daysBetween(lastAlertedOn, today) >= EXPIRED_REMINDER_EVERY_DAYS;
 }
 
 const OIL_ALERT_EVERY_DAYS = 7;
