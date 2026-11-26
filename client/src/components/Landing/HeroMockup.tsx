@@ -60,7 +60,12 @@ export default function HeroMockup() {
                             <span className="text-sm font-black tracking-tight text-black">FlotaLaZi</span>
                         </div>
                         <div className="relative">
-                            <BellRing className="h-4 w-4 text-black" />
+                            {/* Rings: a short left-right swing, then a pause; about every 3 s. */}
+                            <motion.div style={{ transformOrigin: '50% 10%' }}
+                                animate={still ? undefined : { rotate: [0, -18, 16, -12, 8, -4, 0] }}
+                                transition={{ duration: 0.8, ease: 'easeInOut', repeat: Infinity, repeatDelay: 2.2, delay: 1 }}>
+                                <BellRing className="h-4 w-4 text-black" />
+                            </motion.div>
                             <span className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-red-500" />
                         </div>
                     </div>
