@@ -6,8 +6,8 @@ export default function ResetPassword() {
     return (
         <>
             <PageMeta
-                title="Reset Password | FlotaLaZi"
-                description="Set a new password for your FlotaLaZi account"
+                title="Parolă nouă - FlotaLaZi"
+                description="Alege o parolă nouă pentru contul FlotaLaZi."
             />
             <AuthLayout>
                 <ResetPasswordForm />

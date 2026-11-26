@@ -6,8 +6,8 @@ export default function SignIn() {
     return (
         <>
             <PageMeta
-                title="React.js SignIn Dashboard | Sentio - Next.js Admin Dashboard Template"
-                description="This is React.js SignIn Tables Dashboard page for Sentio - React.js Tailwind CSS Admin Dashboard Template"
+                title="Intră în cont - FlotaLaZi"
+                description="Intră în contul tău FlotaLaZi: acte, alerte și profit pentru flota ta."
             />
             <AuthLayout>
                 <SignInForm />

@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+# The app itself sits behind a login: nothing there for a search engine.
+Disallow: /dashboard
+Disallow: /fleet
+Disallow: /documents
+Disallow: /drivers
+Disallow: /finance
+Disallow: /settings
+Disallow: /admin
+Disallow: /reset-password
+Disallow: /forgot-password
+
+Sitemap: https://www.flotalazi.ro/sitemap.xml
