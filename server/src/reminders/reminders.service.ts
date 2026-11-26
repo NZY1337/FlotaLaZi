@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, In, LessThanOrEqual, Repository } from 'typeorm';
 import { FleetDocument } from '../documents/entities/document.entity';
 import { Vehicle, VehicleKind } from '../vehicles/entities/vehicle.entity';
-import { FleetSettings } from '../settings/entities/fleet-settings.entity';
+import { FleetSettings, ownDocumentsLabel } from '../settings/entities/fleet-settings.entity';
 import { UserEntity } from '../user/entities/user.entity';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NodemailerService } from '../../services/nodemailer/nodemailer.service';
@@ -101,20 +101,22 @@ export class RemindersService {
             ? { ownerId }
             : { expiresOn: LessThanOrEqual(addDays(today, MAX_ALERT_DAYS)) };
         const docs = await this.documents.find({ where: docWhere, relations: { vehicle: true, driver: true }, order: { expiresOn: 'ASC' } });
+        // Every vehicle with an engine (trucks, cars) has an oil interval.
+        const trucks = await this.vehicles.find({ where: { kind: In([VehicleKind.TRUCK, VehicleKind.CAR]), ...(mode === 'test' ? { ownerId } : {}) }, order: { plate: 'ASC' } });
+        const ownerIds = [...new Set([...docs.map((d) => d.ownerId), ...trucks.map((t) => t.ownerId), ...(ownerId ? [ownerId] : [])])];
+        const settingsRows = ownerIds.length ? await this.settings.findBy({ ownerId: In(ownerIds) }) : [];
+        const settingsByOwner = new Map(settingsRows.map((s) => [s.ownerId, s]));
+
         for (const d of docs) {
             const { daysLeft, level } = expiryStatus(d.expiresOn, d.alertDays, today);
             const due = mode === 'test' ? level !== 'green' : shouldAlertDocument(d.expiresOn, d.alertDays, d.lastAlertedOn, today);
             if (!due) continue;
             const b = batch(d.ownerId);
-            b.alerts.push({ kind: 'document', type: d.type, subject: d.vehicle?.plate ?? d.driver?.name ?? 'Firmă', expiresOn: d.expiresOn, daysLeft });
+            const subject = d.vehicle?.plate ?? d.driver?.name ?? ownDocumentsLabel(settingsByOwner.get(d.ownerId)?.accountType);
+            b.alerts.push({ kind: 'document', type: d.type, subject, expiresOn: d.expiresOn, daysLeft });
             b.documentIds.push(d.id);
         }
 
-        // Every vehicle with an engine (trucks, cars) has an oil interval.
-        const trucks = await this.vehicles.find({ where: { kind: In([VehicleKind.TRUCK, VehicleKind.CAR]), ...(mode === 'test' ? { ownerId } : {}) }, order: { plate: 'ASC' } });
-        const ownerIds = [...new Set([...trucks.map((t) => t.ownerId), ...(ownerId ? [ownerId] : [])])];
-        const settingsRows = ownerIds.length ? await this.settings.findBy({ ownerId: In(ownerIds) }) : [];
-        const settingsByOwner = new Map(settingsRows.map((s) => [s.ownerId, s]));
         for (const t of trucks) {
             const s = settingsByOwner.get(t.ownerId) ?? DEFAULT_SETTINGS;
             const oil = oilStatus(t, s.oilAlertKm, today);

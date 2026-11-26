@@ -504,6 +504,10 @@ describeDb('FlotaLaZi API (e2e)', () => {
         await as(P).patch('/settings', { accountType: 'SOMETHING' }).expect(400);
         expect((await as(P).patch('/settings', { accountType: 'PERSONAL' }).expect(200)).body.accountType).toBe('PERSONAL');
 
+        // The account's own documents are "Personal", not "Firmă", in the app and in the alerts.
+        await as(P).post('/documents', { type: 'Permis de conducere', expiresOn: addDays(todayYmd(), 5) }).expect(201);
+        expect((await as(P).get('/documents').expect(200)).body[0]).toMatchObject({ type: 'Permis de conducere', subject: 'Personal' });
+
         // A trailer id on a car is ignored: only trucks pull trailers.
         const trailer = (await as(P).post('/vehicles', { kind: 'TRAILER', plate: 'B 99 REM' }).expect(201)).body.id;
         const car = (await as(P).post('/vehicles', { kind: 'CAR', plate: 'b 123 abc', km: 50_000, lastOilKm: 40_000, oilIntervalKm: 15_000, attachedTrailerId: trailer }).expect(201)).body;
@@ -517,7 +521,10 @@ describeDb('FlotaLaZi API (e2e)', () => {
 
         // Cars are in the oil reminders like trucks.
         const test = (await as(P).post('/reminders/test').expect(200)).body;
-        expect(test.alerts).toEqual([expect.stringMatching(/^Schimb ulei — B 123 ABC: mai sunt 5000 km/)]);
+        expect(test.alerts).toEqual([
+            expect.stringMatching(/^Permis de conducere — Personal: expiră în 5 zile/),
+            expect.stringMatching(/^Schimb ulei — B 123 ABC: mai sunt 5000 km/),
+        ]);
 
         await as(P).post(`/vehicles/${car.id}/oil-change`, { km: 51_000, date: todayYmd() }).expect(201);
         await as(P).post(`/vehicles/${trailer}/oil-change`, { km: 1, date: todayYmd() }).expect(400);

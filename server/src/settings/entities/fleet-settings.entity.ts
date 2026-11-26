@@ -9,6 +9,10 @@ export enum AccountType {
     PERSONAL = 'PERSONAL',
 }
 
+/** How a document of the account itself (no vehicle, no driver) is named. */
+export const ownDocumentsLabel = (accountType: AccountType | null | undefined) =>
+    accountType === AccountType.PERSONAL ? 'Personal' : 'Firmă';
+
 // One row per owner (= per firm, CLAUDE.md §6). Created with defaults on first read.
 @Entity('fleet_settings')
 export class FleetSettings {
