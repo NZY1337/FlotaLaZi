@@ -185,18 +185,28 @@ describeDb('FlotaLaZi API (e2e)', () => {
         expect(d.recentExpenses[0]).toMatchObject({ category: 'Schimb ulei', vehiclePlate: 'NT 08 RGT' });
     });
 
-    it('sends reminders once per day and only on threshold days', async () => {
+    it('sends reminders once per day: first alert in the window, then threshold days, then weekly while expired', async () => {
         const reminders = app.get(RemindersService);
         const today = todayYmd();
         expect(await reminders.run(today)).toBe(1);
         const notes = (await as(A).get('/notifications').expect(200)).body;
-        // Only the ITP at 7 days qualifies; the firm licence expired 3 days ago (not a threshold day).
-        expect(notes.map((n: { message: string }) => n.message)).toEqual([expect.stringMatching(/^ITP — NT 08 RGT: expiră în 7 zile/)]);
+        // ITP at 7 days and the firm licence added already expired (never alerted: caught up at once);
+        // the tachograph card at 200 days is outside its window.
+        expect(notes.map((n: { message: string }) => n.message).sort()).toEqual([
+            expect.stringMatching(/^ITP — NT 08 RGT: expiră în 7 zile/),
+            expect.stringMatching(/^Licență Transport — Firmă: a expirat \(3 zile\)/),
+        ]);
         expect(sendText).toHaveBeenCalledTimes(1);
         expect(sendText.mock.calls[0][0]).toBe('1111@test.ro');
 
+        // Same day again: nothing. Next day (6 days left, licence −4): nothing. A week later: the licence again.
         expect(await reminders.run(today)).toBe(0);
-        expect(sendText).toHaveBeenCalledTimes(1);
+        expect(await reminders.run(addDays(today, 1))).toBe(0);
+        expect(await reminders.run(addDays(today, 6))).toBe(1);
+        expect(sendText).toHaveBeenCalledTimes(2);
+        expect(sendText.mock.calls[1][1]).toMatch(/^FlotaLaZi: ITP — NT 08 RGT: expiră mâine/);
+        // Back to today, for the tests below.
+        await db.query(`UPDATE documents SET "lastAlertedOn" = $1 WHERE "lastAlertedOn" > $1`, [today]);
     });
 
     it('sends a test digest of everything red/yellow on demand, without touching the daily bookkeeping', async () => {

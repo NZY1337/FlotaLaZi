@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, FindOptionsWhere, In, Repository } from 'typeorm';
+import { FindOptionsWhere, In, LessThanOrEqual, Repository } from 'typeorm';
 import { FleetDocument } from '../documents/entities/document.entity';
 import { Vehicle, VehicleKind } from '../vehicles/entities/vehicle.entity';
 import { FleetSettings } from '../settings/entities/fleet-settings.entity';
@@ -94,15 +94,16 @@ export class RemindersService {
             return batches.get(owner)!;
         };
 
-        // Scheduled runs only care about documents near a threshold day; a test shows
-        // everything red/yellow, including documents expired long ago.
+        // Scheduled runs look at everything that could be inside its warning window,
+        // expired documents included (they are reminded weekly); a test shows
+        // everything red/yellow of one owner.
         const docWhere: FindOptionsWhere<FleetDocument> = mode === 'test'
             ? { ownerId }
-            : { expiresOn: Between(addDays(today, -1), addDays(today, MAX_ALERT_DAYS)) };
+            : { expiresOn: LessThanOrEqual(addDays(today, MAX_ALERT_DAYS)) };
         const docs = await this.documents.find({ where: docWhere, relations: { vehicle: true, driver: true }, order: { expiresOn: 'ASC' } });
         for (const d of docs) {
             const { daysLeft, level } = expiryStatus(d.expiresOn, d.alertDays, today);
-            const due = mode === 'test' ? level !== 'green' : shouldAlertDocument(daysLeft, d.alertDays, d.lastAlertedOn, today);
+            const due = mode === 'test' ? level !== 'green' : shouldAlertDocument(d.expiresOn, d.alertDays, d.lastAlertedOn, today);
             if (!due) continue;
             const b = batch(d.ownerId);
             b.alerts.push({ kind: 'document', type: d.type, subject: d.vehicle?.plate ?? d.driver?.name ?? 'Firmă', expiresOn: d.expiresOn, daysLeft });
