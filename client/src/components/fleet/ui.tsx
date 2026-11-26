@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { Modal } from '../ui/modal';
 import type { Level } from '../../services/vehicles';
 import { LEVEL_STYLES, formatNumberInput, parseNumberInput } from '../../helpers/fleet';
@@ -226,11 +227,15 @@ export function SelectField({ label, value, onChange, options, required }: {
             <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                 {label}{required && ' *'}
             </label>
-            <select id={id} value={value} required={required} onChange={(e) => onChange(e.target.value)} className={inputClasses}>
-                {options.map((o) => (
-                    <option key={o.value} value={o.value} className="dark:bg-gray-900">{o.label}</option>
-                ))}
-            </select>
+            {/* The browser's own arrow sits flush against the edge; draw ours with room around it. */}
+            <div className="relative">
+                <select id={id} value={value} required={required} onChange={(e) => onChange(e.target.value)} className={`${inputClasses} appearance-none pr-11`}>
+                    {options.map((o) => (
+                        <option key={o.value} value={o.value} className="dark:bg-gray-900">{o.label}</option>
+                    ))}
+                </select>
+                <ChevronDown aria-hidden className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500 dark:text-gray-400" />
+            </div>
         </div>
     );
 }
