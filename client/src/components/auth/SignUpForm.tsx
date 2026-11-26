@@ -104,8 +104,8 @@ export default function SignUpForm() {
                         {confirmationSent ? (
                             <Alert
                                 variant="success"
-                                title="Check your email"
-                                message={`We sent a confirmation link to ${email}. Click it to activate your account.`}
+                                title="Verifică emailul"
+                                message={`Ți-am trimis un link de confirmare la ${email}. Apasă pe el ca să-ți activezi contul. Dacă nu-l găsești în câteva minute, uită-te în Spam (sau Promoții) și marchează-l „Nu este spam”.`}
                             />
                         ) : (
                             <form onSubmit={handleSubmit} noValidate>

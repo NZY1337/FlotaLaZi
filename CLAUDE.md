@@ -86,6 +86,13 @@ External systems:
   is set (production — Railway blocks outbound SMTP below the Pro plan),
   otherwise Gmail SMTP (local dev). The welcome email is sent in the
   background, once per user; a mail failure never fails a request.
+- **Account emails** (confirm sign-up, reset password, change email) are
+  sent by **Supabase Auth itself**, through Resend's SMTP (custom SMTP set
+  up with Resend's Supabase integration, sender `FlotaLaZi
+  <cont@flotalazi.ro>`; Supabase's built-in sender only reaches the project
+  team, 2 emails/hour). Their Romanian text lives in
+  `supabase/email-templates/` and is pasted into Supabase → Authentication →
+  Emails → Templates by hand (see the README there).
 - **WhatsApp Cloud API** — planned reminder channel (§10).
 
 No shared runtime, no shared code, no monorepo tooling.

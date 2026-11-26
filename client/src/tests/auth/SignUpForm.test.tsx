@@ -163,8 +163,9 @@ describe("SignUpForm", () => {
         await user.click(screen.getByRole("button", { name: "Sign Up" }));
 
         expect(await screen.findByRole("alert")).toHaveTextContent(
-            "We sent a confirmation link to ada@example.com",
+            "Ți-am trimis un link de confirmare la ada@example.com",
         );
+        expect(screen.getByRole("alert")).toHaveTextContent("uită-te în Spam");
         expect(mockNavigate).not.toHaveBeenCalled();
     });
 

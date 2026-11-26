@@ -60,8 +60,8 @@ export default function ForgotPasswordForm() {
                         {emailSent ? (
                             <Alert
                                 variant="success"
-                                title="Check your email"
-                                message={`We sent a password reset link to ${email}.`}
+                                title="Verifică emailul"
+                                message={`Ți-am trimis un link pentru parolă nouă la ${email}. Dacă nu-l găsești în câteva minute, uită-te în Spam (sau Promoții) și marchează-l „Nu este spam”.`}
                             />
                         ) : (
                             <form onSubmit={handleSubmit} noValidate>
