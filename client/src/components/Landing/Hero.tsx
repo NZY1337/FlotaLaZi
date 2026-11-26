@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
-import { BellRing } from 'lucide-react';
 import { Link } from 'react-router';
-import { IMAGES } from './images';
+import HeroMockup from './HeroMockup';
 
 export default function Hero() {
     return (
@@ -43,21 +42,8 @@ export default function Hero() {
                         <p className="mt-6 text-xs font-bold uppercase tracking-widest text-gray-400">Primele 2 camioane gratuit · fără card · fără GPS de montat</p>
                     </div>
 
-                    <motion.div initial={{ opacity: 0, rotate: 5, scale: 0.9 }} animate={{ opacity: 1, rotate: -2, scale: 1 }} transition={{ duration: 0.8, delay: 0.4 }}
-                        className="relative">
-                        <div className="relative z-10 bg-black p-2 shadow-[8px_8px_0px_0px_#000000] transform -rotate-2">
-                            <div className="relative aspect-square overflow-hidden">
-                                <img src={IMAGES.hero} alt="Camion FlotaLaZi pe drum" className="w-full h-full object-cover contrast-110" referrerPolicy="no-referrer" />
-                                <div className="absolute bottom-0 left-0 right-0 bg-black p-4 flex items-center justify-between gap-4">
-                                    <div>
-                                        <p className="text-[10px] font-black uppercase text-[#7592ff] tracking-widest mb-1">Alertă · NT 08 RGT</p>
-                                        <p className="text-lg md:text-xl font-black text-white uppercase">ITP expiră în 7 zile</p>
-                                    </div>
-                                    <BellRing className="w-8 h-8 shrink-0 text-[#7592ff]" />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#465fff]/20 -z-10 rounded-full blur-3xl" />
+                    <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.4 }}>
+                        <HeroMockup />
                     </motion.div>
                 </div>
             </div>
