@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 
 // interceptors
 import { UserSyncInterceptor } from './interceptors/user-sync.interceptor';
@@ -30,6 +30,8 @@ import { DriversModule } from './drivers/drivers.module';
 import { DocumentsModule } from './documents/documents.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { AdminModule } from './admin/admin.module';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { FleetThrottlerGuard } from './throttle.guard';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { RemindersModule } from './reminders/reminders.module';
 import { LegacyImportModule } from './legacy-import/legacy-import.module';
@@ -37,6 +39,9 @@ import { LegacyImportModule } from './legacy-import/legacy-import.module';
 @Module({
     imports: [
         ScheduleModule.forRoot(),
+        // 300 requests a minute per session (or IP): far above what a person
+        // clicking through the app sends, low enough to stop a script.
+        ThrottlerModule.forRoot([{ name: 'default', ttl: 60_000, limit: 300 }]),
         EventEmitterModule.forRoot(),
         ConfigModule.forRoot({ isGlobal: true }),
         TypeOrmModule.forRoot({
@@ -64,10 +69,10 @@ import { LegacyImportModule } from './legacy-import/legacy-import.module';
         LegacyImportModule,
         AdminModule,
     ],
-    providers: [{
-        provide: APP_INTERCEPTOR,
-        useClass: UserSyncInterceptor,
-    }],
+    providers: [
+        { provide: APP_GUARD, useClass: FleetThrottlerGuard },
+        { provide: APP_INTERCEPTOR, useClass: UserSyncInterceptor },
+    ],
 })
 
 export class AppModule { }

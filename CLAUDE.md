@@ -263,6 +263,13 @@ it can't use). Error shape: NestJS default.
 `GET /admin/overview` via `RolesGuard`, which answers 404 to everyone else. It
 returns counts per client (vehicles, drivers, documents, transactions, last
 activity), never amounts, plates or document contents.
+**HTTP hardening** (`server/src/http-setup.ts`, shared by `main.ts` and the
+API tests): helmet headers, CORS only for `ALLOWED_ORIGINS` (default: the
+flotalazi.ro and flota-mea.vercel.app sites and localhost:5173), `trust proxy`
+for Railway. Rate limit (`@nestjs/throttler`, `throttle.guard.ts`): 300
+requests/minute per session token (IP when there is none), 5/minute on
+`POST /import/legacy`, none on the notifications stream. Malformed ids are a
+400 (`ParseUUIDPipe`), never a 500.
 **Ownership**: a record of another owner is a 404, never a 403. Ids coming
 from the client (vehicleId, driverId, attachedTrailerId) are verified to
 belong to the same owner before use.
@@ -314,7 +321,8 @@ Pricing to test: ~5–8 € per truck per month, first 2 trucks free.
   `RESEND_API_KEY` + `MAIL_FROM` (production email; `MAIL_FROM` must be on
   a domain verified in Resend — without it Resend's test sender only reaches
   the Resend account owner), `GMAIL_USERNAME`, `GMAIL_APP_PASSWORD` (local
-  dev email), `APP_URL`, `PORT`.
+  dev email), `APP_URL`, `PORT`, `ALLOWED_ORIGINS` (optional, comma-separated
+  browser origins allowed by CORS).
   Env (client): `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_DEFAULT_KEY`,
   `VITE_BACKEND_URL` (defaults to `http://localhost:3010/api`).
 - Deploy: `client/` → Vercel (root `client`, `vercel.json` rewrites every
@@ -329,6 +337,9 @@ Pricing to test: ~5–8 € per truck per month, first 2 trucks free.
 - CI: `.github/workflows/ci.yml` runs the server build, unit tests and API
   tests (against a Postgres service container, migrated first) and the client
   tests and build on every pull request and push to `main`. Merge only green.
+  Dependabot (`.github/dependabot.yml`) opens weekly update PRs per folder.
+  Known and accepted: 3 moderate advisories in TypeORM 0.3's `glob`/`minimatch`
+  (fixed only in TypeORM 1.x; used with fixed patterns at startup).
 - Tests: `server` → `npm test` (jest, unit) and
   `E2E_DATABASE_URL=postgres://… npm run test:e2e` (API against a **throwaway**
   migrated database — the suite truncates every fleet table);
