@@ -110,7 +110,8 @@ export class RemindersService {
             b.documentIds.push(d.id);
         }
 
-        const trucks = await this.vehicles.find({ where: { kind: VehicleKind.TRUCK, ...(mode === 'test' ? { ownerId } : {}) }, order: { plate: 'ASC' } });
+        // Every vehicle with an engine (trucks, cars) has an oil interval.
+        const trucks = await this.vehicles.find({ where: { kind: In([VehicleKind.TRUCK, VehicleKind.CAR]), ...(mode === 'test' ? { ownerId } : {}) }, order: { plate: 'ASC' } });
         const ownerIds = [...new Set([...trucks.map((t) => t.ownerId), ...(ownerId ? [ownerId] : [])])];
         const settingsRows = ownerIds.length ? await this.settings.findBy({ ownerId: In(ownerIds) }) : [];
         const settingsByOwner = new Map(settingsRows.map((s) => [s.ownerId, s]));

@@ -6,7 +6,7 @@ import { VehiclesService } from '../vehicles/vehicles.service';
 import { TransactionsService } from '../transactions/transactions.service';
 import { Transaction, TransactionType } from '../transactions/entities/transaction.entity';
 import { Driver } from '../drivers/entities/driver.entity';
-import { VehicleKind } from '../vehicles/entities/vehicle.entity';
+import { VehicleKind, hasEngine } from '../vehicles/entities/vehicle.entity';
 import { monthRange, todayYmd } from '../fleet/dates';
 
 const MAX_ALERTS = 8;
@@ -41,20 +41,21 @@ export class DashboardService {
         ]);
 
         const urgent = documents.filter((d) => d.level !== 'green');
-        const trucks = vehicles.filter((v) => v.kind === VehicleKind.TRUCK);
+        const withEngine = vehicles.filter((v) => hasEngine(v.kind));
 
         return {
             today,
             month: { ...month, totals: summary.totals },
             documentAlerts: urgent.slice(0, MAX_ALERTS),
             urgentDocumentCount: urgent.length,
-            oil: trucks
+            oil: withEngine
                 .filter((t) => t.oil?.configured)
                 .map((t) => ({ vehicleId: t.id, plate: t.plate, km: t.km, ...t.oil! })),
             recentExpenses: recentExpenses.map(({ vehicle, ...t }) => ({ ...t, vehiclePlate: vehicle?.plate ?? null })),
             counts: {
-                trucks: trucks.length,
-                trailers: vehicles.length - trucks.length,
+                trucks: vehicles.filter((v) => v.kind === VehicleKind.TRUCK).length,
+                trailers: vehicles.filter((v) => v.kind === VehicleKind.TRAILER).length,
+                cars: vehicles.filter((v) => v.kind === VehicleKind.CAR).length,
                 drivers: driverCount,
             },
         };

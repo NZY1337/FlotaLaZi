@@ -179,7 +179,7 @@ describeDb('FlotaLaZi API (e2e)', () => {
 
     it('serves the dashboard', async () => {
         const d = (await as(A).get('/dashboard').expect(200)).body;
-        expect(d.counts).toEqual({ trucks: 1, trailers: 1, drivers: 1 });
+        expect(d.counts).toEqual({ trucks: 1, trailers: 1, cars: 0, drivers: 1 });
         expect(d.urgentDocumentCount).toBe(2);
         expect(d.oil).toEqual([expect.objectContaining({ plate: 'NT 08 RGT', level: 'green' })]);
         expect(d.recentExpenses[0]).toMatchObject({ category: 'Schimb ulei', vehiclePlate: 'NT 08 RGT' });
@@ -379,7 +379,7 @@ describeDb('FlotaLaZi API (e2e)', () => {
 
         const body = (await as(ADMIN).get('/admin/overview').expect(200)).body;
         const e = body.clients.find((c: { id: string }) => c.id === E);
-        expect(e).toMatchObject({ email: '8888@test.ro', trucks: 1, trailers: 1, drivers: 1, documents: 2, transactions: 3, emailAlerts: false });
+        expect(e).toMatchObject({ email: '8888@test.ro', trucks: 1, trailers: 1, cars: 0, drivers: 1, documents: 2, transactions: 3, emailAlerts: false, accountType: 'FIRM' });
         expect(Date.now() - new Date(e.lastSeenAt).getTime()).toBeLessThan(60_000);
         // Counts only: no amounts, plates or document contents leave this endpoint.
         expect(JSON.stringify(body)).not.toMatch(/amount|EE 01 AAA|Licență/);
@@ -496,6 +496,32 @@ describeDb('FlotaLaZi API (e2e)', () => {
         await as(Z).post('/import/legacy', {}).expect(429);
         // Another account is not affected by Z's limit.
         expect((await as('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb').post('/import/legacy', {})).status).not.toBe(429);
+    });
+
+    it('a personal account: chooses its type, keeps cars with km and oil, gets their oil alerts', async () => {
+        const P = '77777777-7777-4777-8777-777777777777';
+        expect((await as(P).get('/settings').expect(200)).body.accountType).toBeNull();
+        await as(P).patch('/settings', { accountType: 'SOMETHING' }).expect(400);
+        expect((await as(P).patch('/settings', { accountType: 'PERSONAL' }).expect(200)).body.accountType).toBe('PERSONAL');
+
+        // A trailer id on a car is ignored: only trucks pull trailers.
+        const trailer = (await as(P).post('/vehicles', { kind: 'TRAILER', plate: 'B 99 REM' }).expect(201)).body.id;
+        const car = (await as(P).post('/vehicles', { kind: 'CAR', plate: 'b 123 abc', km: 50_000, lastOilKm: 40_000, oilIntervalKm: 15_000, attachedTrailerId: trailer }).expect(201)).body;
+        expect(car).toMatchObject({ kind: 'CAR', plate: 'B 123 ABC', attachedTrailerId: null, trailerType: null });
+
+        const listed = (await as(P).get('/vehicles').expect(200)).body.find((v: { id: string }) => v.id === car.id);
+        expect(listed.oil).toMatchObject({ configured: true, kmLeft: 5_000, level: 'yellow' });
+        const d = (await as(P).get('/dashboard').expect(200)).body;
+        expect(d.counts).toEqual({ trucks: 0, trailers: 1, cars: 1, drivers: 0 });
+        expect(d.oil).toEqual([expect.objectContaining({ plate: 'B 123 ABC', level: 'yellow' })]);
+
+        // Cars are in the oil reminders like trucks.
+        const test = (await as(P).post('/reminders/test').expect(200)).body;
+        expect(test.alerts).toEqual([expect.stringMatching(/^Schimb ulei — B 123 ABC: mai sunt 5000 km/)]);
+
+        await as(P).post(`/vehicles/${car.id}/oil-change`, { km: 51_000, date: todayYmd() }).expect(201);
+        await as(P).post(`/vehicles/${trailer}/oil-change`, { km: 1, date: todayYmd() }).expect(400);
+        expect((await as(P).get('/dashboard').expect(200)).body.oil[0]).toMatchObject({ level: 'green', kmLeft: 15_000 });
     });
 
     it('deleting a truck removes its documents and keeps its transactions', async () => {

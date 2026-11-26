@@ -3,16 +3,22 @@ import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, Primary
 export enum VehicleKind {
     TRUCK = 'TRUCK',
     TRAILER = 'TRAILER',
+    // A personal car (accounts of type PERSONAL): like a truck for km, oil and
+    // documents, but never coupled to a trailer.
+    CAR = 'CAR',
 }
+
+/** Vehicles with an engine: they have km and oil changes. */
+export const hasEngine = (kind: VehicleKind) => kind !== VehicleKind.TRAILER;
 
 export enum TrailerType {
     SEMIREMORCA = 'SEMIREMORCA',
     REMORCA = 'REMORCA',
 }
 
-// Trucks and trailers share one table: same lifecycle, same documents and
-// transactions. Truck-only columns (km, oil, attachedTrailerId) stay null
-// on trailers; trailerType stays null on trucks.
+// Trucks, trailers and cars share one table: same lifecycle, same documents
+// and transactions. Engine columns (km, oil) stay null on trailers;
+// attachedTrailerId is for trucks only; trailerType for trailers only.
 @Entity('vehicles')
 @Index(['ownerId', 'kind'])
 export class Vehicle {

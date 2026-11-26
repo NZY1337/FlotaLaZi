@@ -13,10 +13,12 @@ export type AdminClient = {
     lastSeenAt: string;
     trucks: number;
     trailers: number;
+    cars: number;
     drivers: number;
     documents: number;
     transactions: number;
     emailAlerts: boolean;
+    accountType: 'FIRM' | 'PERSONAL';
 };
 
 export type AdminOverview = {
@@ -53,10 +55,12 @@ export class AdminService {
                    u."updatedAt" AT TIME ZONE current_setting('TimeZone') AS "updatedAt",
                    (SELECT count(*) FROM vehicles v WHERE v."ownerId" = u.id AND v.kind = 'TRUCK')   AS trucks,
                    (SELECT count(*) FROM vehicles v WHERE v."ownerId" = u.id AND v.kind = 'TRAILER') AS trailers,
+                   (SELECT count(*) FROM vehicles v WHERE v."ownerId" = u.id AND v.kind = 'CAR')     AS cars,
                    (SELECT count(*) FROM drivers d WHERE d."ownerId" = u.id)                         AS drivers,
                    (SELECT count(*) FROM documents d WHERE d."ownerId" = u.id)                       AS documents,
                    (SELECT count(*) FROM transactions t WHERE t."ownerId" = u.id)                    AS transactions,
-                   COALESCE(s."emailAlerts", true)                                                   AS "emailAlerts"
+                   COALESCE(s."emailAlerts", true)                                                   AS "emailAlerts",
+                   COALESCE(s."accountType"::text, 'FIRM')                                           AS "accountType"
             FROM users u
             LEFT JOIN fleet_settings s ON s."ownerId" = u.id
             ORDER BY u."createdAt" DESC`);
@@ -70,10 +74,12 @@ export class AdminService {
             lastSeenAt: new Date(r.updatedAt as string).toISOString(),
             trucks: n(r.trucks),
             trailers: n(r.trailers),
+            cars: n(r.cars),
             drivers: n(r.drivers),
             documents: n(r.documents),
             transactions: n(r.transactions),
             emailAlerts: Boolean(r.emailAlerts),
+            accountType: r.accountType === 'PERSONAL' ? 'PERSONAL' : 'FIRM',
         }));
 
         const now = Date.now();
