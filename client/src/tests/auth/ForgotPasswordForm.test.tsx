@@ -43,7 +43,7 @@ describe("ForgotPasswordForm", () => {
         await user.click(screen.getByRole("button", { name: /send reset link/i }));
 
         expect(await screen.findByRole("alert")).toHaveTextContent(
-            "We sent a password reset link to ada@example.com.",
+            "Ți-am trimis un link pentru parolă nouă la ada@example.com.",
         );
     });
 
@@ -79,7 +79,7 @@ describe("ForgotPasswordForm", () => {
         expect(await screen.findByRole("button", { name: "Sending..." })).toBeDisabled();
 
         resolve({ data: { ok: true }, error: null });
-        await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Check your email"));
+        await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("Verifică emailul"));
     });
 
     it('should have a link that goes to /signin', () => {
