@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FormModal, NumberField, Row, SelectField, TextField } from './ui';
+import { DateField, FormModal, NumberField, Row, SelectField } from './ui';
 import { useVehicles } from '../../hooks/useVehicles';
 import { parseNumberInput, todayInput } from '../../helpers/fleet';
 import type { Currency } from '../../services/transactions';
@@ -50,7 +50,7 @@ export default function KmModal({ truck, mode, onClose }: Props) {
             <NumberField label="Kilometraj din bord" unit="km" min={0} value={km} onChange={setKm} required />
             {mode === 'oil' && (
                 <>
-                    <TextField label="Data schimbului" type="date" value={date} onChange={setDate} required />
+                    <DateField label="Data schimbului" value={date} onChange={setDate} required />
                     <Row>
                         <NumberField label="Cost (opțional)" decimals={2} unit={currency === 'EUR' ? '€' : 'lei'} min={0} max={1_000_000} value={cost} onChange={setCost} hint="Se adaugă automat la cheltuieli." />
                         <SelectField label="Monedă" value={currency} onChange={(v) => setCurrency(v as Currency)} options={[{ value: 'RON', label: 'RON' }, { value: 'EUR', label: 'EUR' }]} />

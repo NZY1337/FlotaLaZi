@@ -1,8 +1,8 @@
-import { useEffect, useId, useRef, type ReactNode } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { CalendarDays, ChevronDown } from 'lucide-react';
 import { Modal } from '../ui/modal';
 import type { Level } from '../../services/vehicles';
-import { LEVEL_STYLES, formatNumberInput, parseNumberInput } from '../../helpers/fleet';
+import { LEVEL_STYLES, dotDateInput, formatDateInput, formatNumberInput, parseDateInput, parseNumberInput } from '../../helpers/fleet';
 
 // Small building blocks shared by the fleet screens. Styling follows the
 // existing TailAdmin-based shell (Card = the dashboard's rounded-2xl panels).
@@ -119,8 +119,8 @@ export function ErrorText({ error }: { error: unknown }) {
     return <p role="alert" className="rounded-lg bg-error-50 px-3 py-2 text-sm text-error-700 dark:bg-error-500/15 dark:text-error-400">{message}</p>;
 }
 
-// Without bounds, a native date input lets the year run to 6 digits (202788).
-// Same range the server accepts.
+// Same range the server accepts. Without bounds, a native date input lets the
+// year run to 6 digits (202788).
 const DATE_MIN = '2000-01-01';
 const DATE_MAX = '2099-12-31';
 
@@ -128,7 +128,7 @@ export function TextField({ label, value, onChange, type = 'text', required, pla
     label: string;
     value: string;
     onChange: (value: string) => void;
-    type?: 'text' | 'number' | 'date' | 'email' | 'tel';
+    type?: 'text' | 'number' | 'email' | 'tel';
     required?: boolean;
     placeholder?: string;
     hint?: string;
@@ -149,13 +149,94 @@ export function TextField({ label, value, onChange, type = 'text', required, pla
                 value={value}
                 required={required}
                 placeholder={placeholder}
-                min={min ?? (type === 'date' ? DATE_MIN : undefined)}
-                max={max ?? (type === 'date' ? DATE_MAX : undefined)}
+                min={min}
+                max={max}
                 step={step}
                 inputMode={type === 'number' ? 'decimal' : undefined}
                 onChange={(e) => onChange(e.target.value)}
                 className={`${inputClasses} ${uppercase ? 'uppercase placeholder:normal-case' : ''}`}
             />
+            {hint && <p className="mt-1 text-xs text-gray-500">{hint}</p>}
+        </div>
+    );
+}
+
+/**
+ * A date written the Romanian way, zz.ll.aaaa, whatever language the browser
+ * is in (a native date input follows the browser: mm/dd/yyyy on an English
+ * Chrome). `value` / `onChange` stay "YYYY-MM-DD" ('' while incomplete); the
+ * form is blocked with the browser's own message while the date is unclear.
+ * The calendar button opens the browser's own date picker.
+ */
+export function DateField({ label, value, onChange, required, hint }: {
+    label: string;
+    value: string;
+    onChange: (value: string) => void;
+    required?: boolean;
+    hint?: string;
+}) {
+    const id = useId();
+    const ref = useRef<HTMLInputElement>(null);
+    const pickerRef = useRef<HTMLInputElement>(null);
+    const [text, setText] = useState(() => formatDateInput(value));
+    const [touched, setTouched] = useState(false);
+    // Follow changes made from outside (the picker, a form reset), not our own typing.
+    useEffect(() => {
+        setText((current) => ((parseDateInput(current) ?? '') === value ? current : formatDateInput(value)));
+    }, [value]);
+
+    const filled = text.trim() !== '';
+    const problem = filled && parseDateInput(text) === null ? 'Data nu e bună. Scrie zi.lună.an, de exemplu 26.11.2026.' : '';
+    useEffect(() => { ref.current?.setCustomValidity(problem); }, [problem]);
+
+    const type = (raw: string) => {
+        const next = dotDateInput(raw, text);
+        setText(next);
+        onChange(parseDateInput(next) ?? '');
+    };
+    const openPicker = () => {
+        const picker = pickerRef.current;
+        if (!picker) return;
+        try { picker.showPicker(); } catch { picker.focus(); picker.click(); }
+    };
+
+    return (
+        <div>
+            <label htmlFor={id} className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                {label}{required && ' *'}
+            </label>
+            <div className="relative">
+                <input
+                    ref={ref}
+                    id={id}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    placeholder="zz.ll.aaaa"
+                    maxLength={10}
+                    value={text}
+                    required={required}
+                    onChange={(e) => type(e.target.value)}
+                    onBlur={() => setTouched(true)}
+                    className={`${inputClasses} pr-12`}
+                />
+                <button type="button" onClick={openPicker} aria-label="Alege data din calendar"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5">
+                    <CalendarDays className="h-4 w-4" />
+                </button>
+                <input
+                    ref={pickerRef}
+                    type="date"
+                    tabIndex={-1}
+                    aria-hidden
+                    min={DATE_MIN}
+                    max={DATE_MAX}
+                    value={value}
+                    onChange={(e) => { setText(formatDateInput(e.target.value)); onChange(e.target.value); }}
+                    className="pointer-events-none absolute bottom-0 right-0 h-0 w-0 opacity-0"
+                />
+            </div>
+            {problem && (touched || text.length >= 10) && <p className="mt-1 text-xs text-error-500">{problem}</p>}
             {hint && <p className="mt-1 text-xs text-gray-500">{hint}</p>}
         </div>
     );

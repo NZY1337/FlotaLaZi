@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FormModal, NumberField, Row, SelectField, TextField } from './ui';
+import { FormModal, NumberField, Row, SelectField, TextField, DateField } from './ui';
 import { useVehicles } from '../../hooks/useVehicles';
 import { parseNumberInput } from '../../helpers/fleet';
 import type { TrailerType, Vehicle, VehicleInput, VehicleKind } from '../../services/vehicles';
@@ -78,7 +78,7 @@ export default function VehicleFormModal({ isOpen, onClose, kind, vehicle }: Pro
                         <NumberField label="Interval schimb (km)" unit="km" min={1000} value={form.oilIntervalKm} onChange={set('oilIntervalKm')} />
                     </Row>
                     <Row>
-                        <TextField label="Data ultimului schimb" type="date" value={form.lastOilDate} onChange={set('lastOilDate')} />
+                        <DateField label="Data ultimului schimb" value={form.lastOilDate} onChange={set('lastOilDate')} />
                         <TextField label="Interval maxim (luni)" type="number" min={1} max={60} value={form.oilIntervalMonths} onChange={set('oilIntervalMonths')} />
                     </Row>
                 </>
