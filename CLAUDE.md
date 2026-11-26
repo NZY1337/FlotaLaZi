@@ -137,7 +137,8 @@ Landing details:
   use framer-motion and always respect `useReducedMotion()` (reduced motion =
   the final, still picture). Scroll-in animations use `whileInView` with
   `viewport={{ once: true }}` (see `Core.tsx`).
-- `PromoBanner.tsx`: a moving strip at the top of the fixed `Navbar`
+- `PromoBanner.tsx`: a moving yellow strip (`#FFD60A`, black text — it must
+  stand out from the site's blue) at the top of the fixed `Navbar`
   announcing `/masina` (hidden on `/masina`; closing it is remembered in
   `localStorage`; still with reduced motion). The menu has a "Mașina ta ·
   Nou" link; the full menu shows from `xl`, a hamburger below it. The hero

@@ -22,7 +22,7 @@ function NavLink({ link, className, onClick }: { link: NavItem; className: strin
     const content = (
         <>
             {link.label}
-            {link.badge && <span className="ml-2 bg-[#465fff] px-1.5 py-0.5 text-[9px] font-black text-white align-middle">{link.badge}</span>}
+            {link.badge && <span className="ml-2 border border-black bg-[#FFD60A] px-1.5 py-0.5 text-[9px] font-black text-black align-middle">{link.badge}</span>}
         </>
     );
     return link.href.includes('#')
