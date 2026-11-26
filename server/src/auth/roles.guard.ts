@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, NotFoundException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from './roles.decorator';
 import { Role } from '../utils/constants';
@@ -23,14 +23,12 @@ export class RolesGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
         const userId: string | undefined = request.user?.id;
 
-        if (!userId) throw new ForbiddenException('No authenticated user');
+        // A 404, not a 403, as for another owner's records: a client probing
+        // /admin learns nothing about what is there.
+        if (!userId) throw new NotFoundException();
 
         const user = await this.userService.findById(userId);
-        if (!user) throw new ForbiddenException('User not found');
-
-        if (!requiredRoles.includes(user.role)) {
-            throw new ForbiddenException(`Access restricted to: ${requiredRoles.join(', ')}`);
-        }
+        if (!user || !requiredRoles.includes(user.role)) throw new NotFoundException();
 
         // Attach role to request.user so controllers can read it without another DB call
         request.user.role = user.role;

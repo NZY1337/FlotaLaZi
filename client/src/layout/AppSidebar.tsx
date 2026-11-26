@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 
-import { Truck, FileText, Users, Wallet, Settings } from "lucide-react";
+import { Truck, FileText, Users, Wallet, Settings, ShieldCheck } from "lucide-react";
 import {
     ChevronDownIcon,
     GridIcon,
     HorizontaLDots,
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
+import { useCurrentUser } from "../hooks/useCurrentUser";
 
 type NavItem = {
     name: string;
@@ -29,6 +30,7 @@ const navItems: NavItem[] = [
     { icon: <Users />, name: "Șoferi", path: "/drivers" },
     { icon: <Wallet />, name: "Financiar", path: "/finance" },
     { icon: <Settings />, name: "Setări", path: "/settings" },
+    { icon: <ShieldCheck />, name: "Admin", path: "/admin", adminOnly: true },
 ];
 
 
@@ -51,7 +53,9 @@ const AppSidebar: React.FC = () => {
         [location.pathname]
     );
 
-    const visibleItems = navItems;
+    // The server is what refuses /admin to non-admins; this only hides the link.
+    const { isAdmin } = useCurrentUser();
+    const visibleItems = navItems.filter((item) => !item.adminOnly || isAdmin);
 
     useEffect(() => {
         let submenuMatched = false;

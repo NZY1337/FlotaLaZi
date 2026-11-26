@@ -345,6 +345,46 @@ describeDb('FlotaLaZi API (e2e)', () => {
         expect(row.amountRon).toBe(2_000_000_000);
     });
 
+    it('admin overview: 404 for clients, counts per client for the admin, no money', async () => {
+        const ADMIN = '77777777-7777-4777-8777-777777777777';
+        const E = '88888888-8888-4888-8888-888888888888';
+
+        // A client cannot see that the route exists.
+        await as(E).get('/admin/overview').expect(404);
+        await as(ADMIN).get('/settings').expect(200);           // the account exists, as a plain user
+        await as(ADMIN).get('/admin/overview').expect(404);
+        await db.query(`UPDATE users SET role = 'admin' WHERE id = $1`, [ADMIN]);
+
+        // E: 1 truck, 1 trailer, 1 driver, 2 documents, 3 transactions, alerts off.
+        await as(E).patch('/settings', { emailAlerts: false }).expect(200);
+        const truck = (await as(E).post('/vehicles', { kind: 'TRUCK', plate: 'EE 01 AAA' }).expect(201)).body.id;
+        await as(E).post('/vehicles', { kind: 'TRAILER', plate: 'EE 02 BBB' }).expect(201);
+        await as(E).post('/drivers', { name: 'Ion' }).expect(201);
+        await as(E).post('/documents', { type: 'ITP', expiresOn: addDays(todayYmd(), 40), alertDays: 30, vehicleId: truck }).expect(201);
+        await as(E).post('/documents', { type: 'Licență Transport', expiresOn: addDays(todayYmd(), 200), alertDays: 30 }).expect(201);
+        for (const amount of [100, 200, 300]) {
+            await as(E).post('/transactions', { type: 'EXPENSE', date: todayYmd(), amount, currency: 'RON', category: 'Altele' }).expect(201);
+        }
+
+        const body = (await as(ADMIN).get('/admin/overview').expect(200)).body;
+        const e = body.clients.find((c: { id: string }) => c.id === E);
+        expect(e).toMatchObject({ email: '8888@test.ro', trucks: 1, trailers: 1, drivers: 1, documents: 2, transactions: 3, emailAlerts: false });
+        expect(Date.now() - new Date(e.lastSeenAt).getTime()).toBeLessThan(60_000);
+        // Counts only: no amounts, plates or document contents leave this endpoint.
+        expect(JSON.stringify(body)).not.toMatch(/amount|EE 01 AAA|Licență/);
+
+        const [db1] = await db.query(`SELECT (SELECT count(*) FROM users)::int AS users,
+            (SELECT count(*) FROM vehicles WHERE kind = 'TRUCK')::int AS trucks,
+            (SELECT count(*) FROM transactions)::int AS transactions`);
+        expect(body.totals).toMatchObject({ users: db1.users, trucks: db1.trucks, transactions: db1.transactions });
+        expect(body.totals.activeUsers7d).toBeGreaterThanOrEqual(2);
+    });
+
+    it('no longer serves another user\'s profile by id', async () => {
+        await request(app.getHttpServer()).get(`/api/user/${A}`).expect(404);
+        await as(B).get(`/user/${A}`).expect(404);
+    });
+
     it('deleting a truck removes its documents and keeps its transactions', async () => {
         await as(A).delete(`/vehicles/${truckId}`).expect(204);
         const docs = (await as(A).get('/documents').expect(200)).body;

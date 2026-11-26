@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { SupabaseAuthGuard } from '../auth/supabase-auth.guard';
 
@@ -12,10 +12,5 @@ export class UserController {
     @UseGuards(SupabaseAuthGuard)
     getMe(@Req() req: AuthReq) {
         return this.userService.findById(req.user.id);
-    }
-
-    @Get(':id')
-    findOne(@Param('id') id: string) {
-        return this.userService.findById(id);
     }
 }

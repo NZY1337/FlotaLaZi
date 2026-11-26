@@ -112,6 +112,7 @@ Routes:
 /drivers     Șoferi
 /finance     Financiar    (period summary, chart, per category / vehicle, list)
 /settings    Setări       (EUR rate, alert thresholds, email alerts, import)
+/admin       Admin        (platform owner only: clients, usage counts)
 ```
 
 `/` is the public landing page (`components/Landing/`, same neo-brutalist
@@ -134,6 +135,7 @@ server/src/
   dashboard/      GET /dashboard — read-only aggregation of the above
   reminders/      daily cron: decides which alerts are due and sends them
   legacy-import/  POST /import/legacy — maps the old JSON backup
+  admin/          GET /admin/overview — platform owner's read-only counts
   fleet/          pure, framework-free helpers shared by the modules above
                   (dates in Europe/Bucharest, expiry + oil status, money)
 server/services/  infrastructure: nodemailer, supabase
@@ -250,12 +252,17 @@ POST  /import/legacy            (body = legacy JSON backup)
 POST  /reminders/test           (no body; see §7)
 GET   /notifications …          (kept)
 GET   /user/me                  (kept)
+GET   /admin/overview           (Role.ADMIN only; see below)
 ```
 
 Every body has a DTO (class-validator). The one exception is
 `POST /import/legacy`: its body is the old app's free-form backup and
 `legacy-import/legacy-mapper.ts` validates every field itself (and skips what
 it can't use). Error shape: NestJS default.
+**Admin**: `users.role = 'admin'` (set by hand in the database) unlocks
+`GET /admin/overview` via `RolesGuard`, which answers 404 to everyone else. It
+returns counts per client (vehicles, drivers, documents, transactions, last
+activity), never amounts, plates or document contents.
 **Ownership**: a record of another owner is a 404, never a 403. Ids coming
 from the client (vehicleId, driverId, attachedTrailerId) are verified to
 belong to the same owner before use.

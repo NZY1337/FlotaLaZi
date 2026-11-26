@@ -29,6 +29,7 @@ import { VehiclesModule } from './vehicles/vehicles.module';
 import { DriversModule } from './drivers/drivers.module';
 import { DocumentsModule } from './documents/documents.module';
 import { TransactionsModule } from './transactions/transactions.module';
+import { AdminModule } from './admin/admin.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { RemindersModule } from './reminders/reminders.module';
 import { LegacyImportModule } from './legacy-import/legacy-import.module';
@@ -61,6 +62,7 @@ import { LegacyImportModule } from './legacy-import/legacy-import.module';
         DashboardModule,
         RemindersModule,
         LegacyImportModule,
+        AdminModule,
     ],
     providers: [{
         provide: APP_INTERCEPTOR,
