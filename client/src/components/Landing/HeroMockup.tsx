@@ -9,8 +9,8 @@ import { IMAGES } from './images';
 // any size, no image to load) with the landing's neo-brutalist style.
 //
 // Motion, once on load: the oil bar fills, the 08:00 email slides in, the
-// profit counts up and its bars rise. Then only small loops: the red dot
-// pulses and the two cards float. People who ask their system for reduced
+// profit counts up and its bars rise. Then only small loops: the bell rings,
+// the red dot pulses and the profit bars breathe; the two cards stay put. People who ask their system for reduced
 // motion get the final, still picture.
 
 const alerts = [
@@ -39,8 +39,6 @@ export default function HeroMockup() {
     const profit = useCountUp(PROFIT, 1.6, still);
     // `initial={false}` renders the end state straight away.
     const from = <T,>(start: T) => (still ? false : start);
-    const float = (dy: number, duration: number) =>
-        still ? undefined : { y: [0, dy, 0], transition: { duration, repeat: Infinity, ease: 'easeInOut' as const, delay: 2.6 } };
 
     return (
         <div className="relative mx-auto w-full max-w-[540px] pt-6 sm:pt-10 sm:pb-6">
@@ -107,7 +105,7 @@ export default function HeroMockup() {
             {/* The 08:00 email. */}
             <motion.div className="relative z-20 -mt-6 ml-auto w-[85%] sm:absolute sm:right-0 sm:top-[16%] sm:mt-0 sm:w-[44%]"
                 initial={from({ opacity: 0, x: 40 })} animate={{ opacity: 1, x: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 20, delay: 1.2 }}>
-            <motion.div className="border-2 border-black bg-white p-3 shadow-[6px_6px_0px_0px_#000000]" animate={float(-6, 4)}>
+            <motion.div className="border-2 border-black bg-white p-3 shadow-[6px_6px_0px_0px_#000000]">
                 <div className="mb-1.5 flex items-center gap-2">
                     <div className="flex h-6 w-6 items-center justify-center bg-[#465fff]">
                         <Mail className="h-3.5 w-3.5 text-white" />
@@ -122,7 +120,7 @@ export default function HeroMockup() {
             {/* Profit per truck. */}
             <motion.div className="relative z-20 mt-4 mr-4 ml-auto w-[75%] sm:absolute sm:bottom-6 sm:right-0 sm:mt-0 sm:mr-0 sm:w-[44%]"
                 initial={from({ opacity: 0, y: 30 })} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 1.5 }}>
-            <motion.div className="border-2 border-black bg-black p-3 text-white shadow-[6px_6px_0px_0px_#465fff]" animate={float(5, 5)}>
+            <motion.div className="border-2 border-black bg-black p-3 text-white shadow-[6px_6px_0px_0px_#465fff]">
                 <div className="flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase tracking-widest text-[#7592ff]">Profit · noiembrie</span>
                     <TrendingUp className="h-4 w-4 text-emerald-400" />
