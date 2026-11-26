@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { DateShortcuts, FormModal, SelectField, TextField } from './ui';
+import { DateShortcuts, FormModal, SelectField, TextField, DateField } from './ui';
 import { useDocuments } from '../../hooks/useDocuments';
 import { useVehicles } from '../../hooks/useVehicles';
 import { useDrivers } from '../../hooks/useDrivers';
@@ -93,7 +93,7 @@ export default function DocumentFormModal({ isOpen, onClose, document, subject }
                 options={[...typeList.map((t) => ({ value: t, label: t })), { value: CUSTOM, label: 'Alt act (scriu eu)…' }]} />
             {typeChoice === CUSTOM && <TextField label="Numele actului" value={customType} onChange={setCustomType} required placeholder="ex: Asigurare CMR" />}
             <div>
-                <TextField label="Data expirării" type="date" value={expiresOn} onChange={setExpiresOn} required />
+                <DateField label="Data expirării" value={expiresOn} onChange={setExpiresOn} required />
                 <DateShortcuts onPick={(m) => setExpiresOn(plusMonthsInput(m))} />
             </div>
             <TextField label="Anunță-mă cu câte zile înainte" type="number" min={1} max={365} value={alertDays} onChange={setAlertDays} required />

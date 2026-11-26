@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { FormModal, NumberField, Row, SelectField, TextField } from './ui';
+import { FormModal, NumberField, Row, SelectField, TextField, DateField } from './ui';
 import { useTransactionMutations } from '../../hooks/useTransactions';
 import { useVehicles } from '../../hooks/useVehicles';
 import { EXPENSE_CATEGORIES, FUEL_CATEGORY, INCOME_CATEGORIES, parseNumberInput, todayInput } from '../../helpers/fleet';
@@ -86,7 +86,7 @@ export default function TransactionFormModal({ isOpen, onClose, type = 'EXPENSE'
             </Row>
             <Row>
                 <SelectField label="Categorie" value={category} onChange={setCategory} options={categoryOptions} required />
-                <TextField label="Data" type="date" value={date} onChange={setDate} required />
+                <DateField label="Data" value={date} onChange={setDate} required />
             </Row>
             <SelectField label="Camion / remorcă" value={vehicleId} onChange={setVehicleId}
                 options={[{ value: '', label: '🏢 General / firmă' }, ...vehicles.map((v) => ({ value: v.id, label: `${v.kind === 'TRUCK' ? '🚛' : '🚚'} ${v.plate}` }))]} />

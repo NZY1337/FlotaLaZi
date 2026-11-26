@@ -129,3 +129,35 @@ export const sinceLabel = (iso: string, now: Date = new Date()) => {
     if (days < 60) return `acum ${days} zile`;
     return `acum ${Math.round(days / 30)} luni`;
 };
+
+/** "2026-11-26" → "26.11.2026", the way dates are written in Romania. */
+export const formatDateInput = (ymd: string) => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd);
+    return m ? `${m[3]}.${m[2]}.${m[1]}` : '';
+};
+
+/**
+ * A date typed the Romanian way, day first: "26.11.2026", "26/11/2026",
+ * "26-11-2026", "5.3.2026" or "26112026". Returns "YYYY-MM-DD", or null when
+ * it is incomplete, not a real day (31.02) or outside 2000–2099 (the range the
+ * server accepts). Only reads the input: the server still validates the date.
+ */
+export const parseDateInput = (input: string): string | null => {
+    const text = input.trim();
+    const m = /^(\d{1,2})[./\-\s](\d{1,2})[./\-\s](\d{4})$/.exec(text) ?? /^(\d{2})(\d{2})(\d{4})$/.exec(text);
+    if (!m) return null;
+    const [day, month, year] = [Number(m[1]), Number(m[2]), Number(m[3])];
+    if (year < 2000 || year > 2099 || month < 1 || month > 12 || day < 1) return null;
+    if (day > new Date(Date.UTC(year, month, 0)).getUTCDate()) return null;
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+};
+
+/**
+ * Adds the dots while the date is typed: "26" → "26.", "26.11" → "26.11.".
+ * Only when a character was added, so backspace can still remove a dot.
+ */
+export const dotDateInput = (next: string, previous: string) => {
+    const text = next.replace(/[/\-\s]/g, '.');
+    if (text.length <= previous.length) return text;
+    return /^\d{2}$|^\d{1,2}\.\d{2}$/.test(text) ? `${text}.` : text;
+};
