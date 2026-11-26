@@ -7,6 +7,7 @@ import type { Currency } from '../services/transactions';
 export const DOCUMENT_TYPES = [
     'ITP', 'Asigurare RCA', 'Asigurare CASCO', 'Rovinietă', 'Verificare Tahograf', 'Copie Conformă',
     'Licență Transport', 'Licență Comunitară', 'ADR', 'Asigurare CMR',
+    'Impozit auto', 'Trusă medicală', 'Extinctor',
 ];
 
 export const DRIVER_DOCUMENT_TYPES = [
