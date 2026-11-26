@@ -20,7 +20,7 @@ const steps = [
 const faqs = [
     { q: 'Chiar e gratuit?', a: 'Da. O mașină e gratuită pentru totdeauna. Dacă ai mai multe, fiecare mașină în plus va costa 25 de lei pe an, de la lansare. Acum, în perioada de testare, totul e gratuit.' },
     { q: 'Trebuie să instalez ceva?', a: 'Nu. Alertele vin pe email, iar aplicația merge din browser. Dacă vrei, o poți pune pe ecranul telefonului ca pe o aplicație.' },
-    { q: 'De ce scrie „camion” în aplicație?', a: 'FlotaLaZi e făcut în primul rând pentru firmele de transport. Mașina ta o adaugi din „Flotă” → „Adaugă camion” și funcționează la fel. Lucrăm la o variantă cu cuvintele potrivite pentru mașina personală.' },
+    { q: 'E aceeași aplicație ca pentru firmele de transport?', a: 'Da, dar când îți faci contul de aici, vezi doar ce îți trebuie: mașinile tale, actele lor, actele tale și schimbul de ulei. Fără camioane, șoferi sau contabilitate.' },
     { q: 'Ce fac cu datele mele?', a: 'Le folosim doar ca să-ți trimitem alertele. Nu le vindem și nu le dăm nimănui.' },
 ];
 
@@ -55,7 +55,7 @@ export default function Masina() {
                             Primești un email înainte să-ți expire un act al mașinii. Gratuit pentru o mașină, pentru totdeauna. Fără aplicație de instalat.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4">
-                            <Link to="/signup" className="bg-black text-white px-10 py-5 font-black uppercase tracking-tight text-lg text-center border-2 border-black shadow-[4px_4px_0px_0px_#465fff] hover:bg-[#465fff] transition-all">
+                            <Link to="/signup?tip=personal" className="bg-black text-white px-10 py-5 font-black uppercase tracking-tight text-lg text-center border-2 border-black shadow-[4px_4px_0px_0px_#465fff] hover:bg-[#465fff] transition-all">
                                 Creează cont gratuit
                             </Link>
                             <Link to="/" className="px-6 py-5 font-bold uppercase tracking-tight text-sm text-center border-2 border-black hover:bg-gray-50">
@@ -133,7 +133,7 @@ export default function Masina() {
                         ))}
                     </div>
                     <div className="mt-14 text-center">
-                        <Link to="/signup" className="inline-block bg-[#465fff] text-white px-12 py-5 font-black uppercase tracking-tight text-xl border-2 border-black shadow-[4px_4px_0px_0px_#000000] hover:bg-black transition-all">
+                        <Link to="/signup?tip=personal" className="inline-block bg-[#465fff] text-white px-12 py-5 font-black uppercase tracking-tight text-xl border-2 border-black shadow-[4px_4px_0px_0px_#000000] hover:bg-black transition-all">
                             Creează cont gratuit
                         </Link>
                     </div>

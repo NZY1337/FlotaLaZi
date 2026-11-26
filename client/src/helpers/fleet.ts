@@ -10,6 +10,13 @@ export const DOCUMENT_TYPES = [
     'Impozit auto', 'Trusă medicală', 'Extinctor',
 ];
 
+// Personal accounts: a car's documents, and the owner's own.
+export const CAR_DOCUMENT_TYPES = [
+    'ITP', 'Asigurare RCA', 'Asigurare CASCO', 'Rovinietă', 'Impozit auto', 'Trusă medicală', 'Extinctor',
+];
+
+export const PERSONAL_DOCUMENT_TYPES = ['Permis de conducere', 'Carte de identitate', 'Pașaport'];
+
 export const DRIVER_DOCUMENT_TYPES = [
     'Permis de conducere', 'Atestat profesional', 'Card tahograf', 'Aviz medical', 'Aviz psihologic', 'Cartelă / Card ADR',
 ];

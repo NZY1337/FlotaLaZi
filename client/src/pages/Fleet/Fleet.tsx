@@ -7,6 +7,7 @@ import VehicleFormModal from '../../components/fleet/VehicleFormModal';
 import KmModal from '../../components/fleet/KmModal';
 import DocumentFormModal from '../../components/fleet/DocumentFormModal';
 import { useVehicles } from '../../hooks/useVehicles';
+import { useAccountType } from '../../hooks/useSettings';
 import { useDocuments } from '../../hooks/useDocuments';
 import { formatKm } from '../../helpers/fleet';
 import type { Vehicle, VehicleKind } from '../../services/vehicles';
@@ -34,7 +35,8 @@ function DocChips({ docs }: { docs: FleetDocument[] }) {
 }
 
 export default function Fleet() {
-    const { trucks, trailers, isLoading, isError, remove } = useVehicles();
+    const { trucks, trailers, cars, isLoading, isError, remove } = useVehicles();
+    const { personal } = useAccountType();
     const { documents } = useDocuments();
     const [filter, setFilter] = useState<Filter>('all');
     const [form, setForm] = useState<{ kind: VehicleKind; vehicle: Vehicle | null } | null>(null);
@@ -49,7 +51,7 @@ export default function Fleet() {
 
     const cardActions = (v: Vehicle) => (
         <div className="mt-4 flex flex-wrap gap-2">
-            {v.kind === 'TRUCK' && (
+            {v.kind !== 'TRAILER' && (
                 <>
                     <ActionButton size="sm" variant="outline" onClick={() => setKm({ truck: v, mode: 'km' })}>Actualizează km</ActionButton>
                     <ActionButton size="sm" variant="outline" onClick={() => setKm({ truck: v, mode: 'oil' })}>🛢️ Schimb ulei făcut</ActionButton>
@@ -60,6 +62,55 @@ export default function Fleet() {
             <ActionButton size="sm" variant="outline" onClick={() => confirmDelete(v)}>Șterge</ActionButton>
         </div>
     );
+
+    // A truck or a car: km, oil, documents (a truck also shows its trailer).
+    const engineCard = (t: Vehicle) => (
+        <article key={t.id} className={`${cardClasses} p-5`}>
+            <div className="flex items-start justify-between gap-3">
+                <div>
+                    <h3 className="text-lg font-bold text-gray-800 dark:text-white/90">{t.plate}</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{t.name || (t.kind === 'CAR' ? 'Mașină' : 'Camion')}</p>
+                    <VinLine vin={t.vin} />
+                </div>
+                <div className="text-right text-sm">
+                    <p className="font-semibold text-gray-800 dark:text-white/90">{formatKm(t.km)}</p>
+                    {t.kind === 'TRUCK' && <p className="text-xs text-gray-500">🚚 {t.attachedTrailer?.plate ?? 'fără remorcă'}</p>}
+                </div>
+            </div>
+            <div className="mt-4 flex flex-col gap-3">
+                {t.oil && <OilBar oil={t.oil} />}
+                <DocChips docs={docsOf(t.id)} />
+            </div>
+            {cardActions(t)}
+        </article>
+    );
+
+    const modals = (
+        <>
+            <VehicleFormModal isOpen={!!form} kind={form?.kind ?? 'TRUCK'} vehicle={form?.vehicle} onClose={() => setForm(null)} />
+            <KmModal truck={km?.truck ?? null} mode={km?.mode ?? 'km'} onClose={() => setKm(null)} />
+            <DocumentFormModal isOpen={!!docFor} subject={docFor ?? undefined} onClose={() => setDocFor(null)} />
+        </>
+    );
+
+    // A personal account sees only its cars (and a truck, if it ever added one).
+    if (personal) {
+        const mine = [...cars, ...trucks];
+        const addCar = () => setForm({ kind: 'CAR', vehicle: null });
+        return (
+            <>
+                <PageMeta title="Mașinile mele - FlotaLaZi" description="Mașinile tale, kilometrajul și schimbul de ulei." />
+                <PageHeader title="Mașinile mele" subtitle="Kilometrajul, schimbul de ulei și actele fiecărei mașini."
+                    actions={<ActionButton onClick={addCar}>+ Mașină</ActionButton>} />
+                {isError && <Alert variant="error" title="Eroare" message="Nu am putut încărca mașinile." />}
+                {isLoading && <p className="text-sm text-gray-500">Se încarcă…</p>}
+                {!isLoading && mine.length === 0
+                    ? <EmptyState icon="🚗" title="Nicio mașină" text="Adaugă mașina, apoi datele de expirare ale actelor ei." action={<ActionButton onClick={addCar}>+ Adaugă mașina</ActionButton>} />
+                    : <div className="grid gap-4 lg:grid-cols-2">{mine.map(engineCard)}</div>}
+                {modals}
+            </>
+        );
+    }
 
     return (
         <>
@@ -91,26 +142,7 @@ export default function Fleet() {
                         ? <EmptyState icon="🚛" title="Niciun camion" action={<ActionButton onClick={() => setForm({ kind: 'TRUCK', vehicle: null })}>+ Adaugă camion</ActionButton>} />
                         : (
                             <div className="grid gap-4 lg:grid-cols-2">
-                                {trucks.map((t) => (
-                                    <article key={t.id} className={`${cardClasses} p-5`}>
-                                        <div className="flex items-start justify-between gap-3">
-                                            <div>
-                                                <h3 className="text-lg font-bold text-gray-800 dark:text-white/90">{t.plate}</h3>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400">{t.name || 'Camion'}</p>
-                                                <VinLine vin={t.vin} />
-                                            </div>
-                                            <div className="text-right text-sm">
-                                                <p className="font-semibold text-gray-800 dark:text-white/90">{formatKm(t.km)}</p>
-                                                <p className="text-xs text-gray-500">🚚 {t.attachedTrailer?.plate ?? 'fără remorcă'}</p>
-                                            </div>
-                                        </div>
-                                        <div className="mt-4 flex flex-col gap-3">
-                                            {t.oil && <OilBar oil={t.oil} />}
-                                            <DocChips docs={docsOf(t.id)} />
-                                        </div>
-                                        {cardActions(t)}
-                                    </article>
-                                ))}
+                                {trucks.map(engineCard)}
                             </div>
                         )}
                 </section>
@@ -145,9 +177,15 @@ export default function Fleet() {
                 </section>
             )}
 
-            <VehicleFormModal isOpen={!!form} kind={form?.kind ?? 'TRUCK'} vehicle={form?.vehicle} onClose={() => setForm(null)} />
-            <KmModal truck={km?.truck ?? null} mode={km?.mode ?? 'km'} onClose={() => setKm(null)} />
-            <DocumentFormModal isOpen={!!docFor} subject={docFor ?? undefined} onClose={() => setDocFor(null)} />
+            {/* Cars of a firm account (service cars): shown only when there are some. */}
+            {filter === 'all' && cars.length > 0 && (
+                <section className="mt-8">
+                    <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">🚗 Autoturisme</h2>
+                    <div className="grid gap-4 lg:grid-cols-2">{cars.map(engineCard)}</div>
+                </section>
+            )}
+
+            {modals}
         </>
     );
 }

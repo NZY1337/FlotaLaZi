@@ -10,7 +10,7 @@ export type Dashboard = {
     urgentDocumentCount: number;
     oil: ({ vehicleId: string; plate: string; km: number | null } & OilStatus)[];
     recentExpenses: (Transaction & { vehiclePlate: string | null })[];
-    counts: { trucks: number; trailers: number; drivers: number };
+    counts: { trucks: number; trailers: number; cars: number; drivers: number };
 };
 
 export const getDashboard = (token: string) => apiFetch<Dashboard>(token, '/dashboard');

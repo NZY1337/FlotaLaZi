@@ -9,10 +9,12 @@ export type AdminClient = {
     lastSeenAt: string;
     trucks: number;
     trailers: number;
+    cars: number;
     drivers: number;
     documents: number;
     transactions: number;
     emailAlerts: boolean;
+    accountType: 'FIRM' | 'PERSONAL';
 };
 
 export type AdminOverview = {
@@ -23,6 +25,8 @@ export type AdminOverview = {
         activeUsers7d: number;
         trucks: number;
         trailers: number;
+        cars: number;
+        personalUsers: number;
         drivers: number;
         documents: number;
         transactions: number;

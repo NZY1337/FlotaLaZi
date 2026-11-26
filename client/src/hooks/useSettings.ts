@@ -9,6 +9,27 @@ export const useSettings = () => {
     return { settings, isLoading, isError, update };
 };
 
+/** Firm or personal account; null until the owner has chosen (behaves as a firm). */
+export const useAccountType = () => {
+    const { settings } = useSettings();
+    const accountType = settings?.accountType ?? null;
+    return { accountType, personal: accountType === 'PERSONAL', loaded: !!settings };
+};
+
+// /masina sends people to /signup?tip=personal; the choice waits in this
+// browser until the first dashboard after sign-up applies it.
+const PENDING_TYPE_KEY = 'flotalazi.accountType';
+export const rememberPersonalSignup = () => {
+    try { localStorage.setItem(PENDING_TYPE_KEY, 'PERSONAL'); } catch { /* private mode: they'll be asked instead */ }
+};
+export const takePendingAccountType = (): 'PERSONAL' | null => {
+    try {
+        const v = localStorage.getItem(PENDING_TYPE_KEY);
+        localStorage.removeItem(PENDING_TYPE_KEY);
+        return v === 'PERSONAL' ? 'PERSONAL' : null;
+    } catch { return null; }
+};
+
 export const useLegacyImport = () =>
     useAuthedMutation((token, backup: unknown) => importLegacyBackup(token, backup), [
         'settings', 'vehicles', 'documents', 'transactions', 'transactions-summary', 'dashboard',

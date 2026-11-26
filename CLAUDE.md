@@ -37,10 +37,12 @@ What the platform does:
 
 Secondary audience (an experiment for traffic, not a second product): people
 with **one personal car**, on the public page `/masina` — the same document
-reminders (ITP, RCA, rovinietă…), one vehicle free for ever. The app itself
-still speaks transport ("camion", "Flotă"); a simplified personal mode
-(account type at sign-up, an `Autoturism` vehicle kind, no Financiar/Șoferi)
-is built only if `/masina` brings real sign-ups.
+reminders (ITP, RCA, rovinietă…), one vehicle free for ever. A **personal
+account** (`FleetSettings.accountType = PERSONAL`) sees a simplified app:
+"Mașinile mele" (vehicles of kind `CAR`), Acte with car and ID-paper types,
+Setări; no Șoferi, no Financiar, no money on the dashboard. A new account
+picks firm or personal on its first, empty dashboard (`/signup?tip=personal`
+from `/masina` picks personal without asking); it can switch in Setări.
 
 What the platform explicitly is **not**:
 
@@ -157,6 +159,14 @@ Landing details:
   putting the site's description back when the page unmounts. Crawlers
   that don't run JS see only the `index.html` description.
 
+Firm vs personal: `useAccountType()` (`hooks/useSettings.ts`) gives
+`{ accountType, personal }`; `null` (not chosen) behaves as a firm. The
+sidebar hides `firmOnly` items and renames Flotă for personal accounts; Fleet,
+Dashboard, Documents and Settings branch on `personal`. Document types per
+subject: `DOCUMENT_TYPES` (trucks, trailers, firm), `CAR_DOCUMENT_TYPES`,
+`DRIVER_DOCUMENT_TYPES`, `PERSONAL_DOCUMENT_TYPES` (the account's own, shown
+as "Eu" / labelled "Personal" by the server).
+
 Form inputs (`components/fleet/ui.tsx`) — use these, never a native
 `type="number"` or `type="date"` input:
 
@@ -221,15 +231,16 @@ FleetSettings {            // one row per owner, created on first read
   oilAlertKm: number       // warn this many km before an oil change
   docAlertDays: number     // default alertDays for new documents
   emailAlerts: boolean
+  accountType: 'FIRM' | 'PERSONAL' | null   // null = not chosen, acts as FIRM
 }
 
 Vehicle {
   id, ownerId
-  kind: 'TRUCK' | 'TRAILER'
+  kind: 'TRUCK' | 'TRAILER' | 'CAR'        // CAR: personal accounts
   plate, name, vin, notes
   trailerType?: 'SEMIREMORCA' | 'REMORCA'      // trailers only
   attachedTrailerId?: uuid                       // trucks only, unique
-  km?, lastOilKm?, oilIntervalKm?, lastOilDate?, oilIntervalMonths?   // trucks only
+  km?, lastOilKm?, oilIntervalKm?, lastOilDate?, oilIntervalMonths?   // trucks + cars (hasEngine)
   lastOilAlertOn?: date                          // reminder bookkeeping
 }
 
@@ -238,7 +249,7 @@ Driver { id, ownerId, name, phone?, email?, notes? }
 Document {
   id, ownerId
   vehicleId?: uuid    // at most one of vehicleId / driverId;
-  driverId?: uuid     // both null = firm-level (e.g. licență transport)
+  driverId?: uuid     // both null = the account's own ("Firmă" / "Personal")
   type: string        // free text, UI offers the usual list
   expiresOn: date
   alertDays: number
@@ -272,7 +283,7 @@ their documents.
 
 - `daysLeft = expiresOn − today`. `≤ 0` → **red** (expirat / expiră azi),
   `≤ alertDays` → **yellow**, else **green**.
-- Oil: red when `km ≥ lastOilKm + oilIntervalKm` or the months interval has
+- Oil (trucks and cars — `hasEngine(kind)`): red when `km ≥ lastOilKm + oilIntervalKm` or the months interval has
   passed; yellow when within `oilAlertKm` km or 30 days; else green.
 - Reminders (`shouldAlertDocument`) send a document alert at most once per
   day (`lastAlertedOn`): the first one as soon as the document is inside its

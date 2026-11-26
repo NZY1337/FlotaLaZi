@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router";
 
-import { Truck, FileText, Users, Wallet, Settings, ShieldCheck } from "lucide-react";
+import { Truck, Car, FileText, Users, Wallet, Settings, ShieldCheck } from "lucide-react";
 import {
     ChevronDownIcon,
     GridIcon,
@@ -9,12 +9,15 @@ import {
 } from "../icons";
 import { useSidebar } from "../context/SidebarContext";
 import { useCurrentUser } from "../hooks/useCurrentUser";
+import { useAccountType } from "../hooks/useSettings";
 
 type NavItem = {
     name: string;
     icon: React.ReactNode;
     path?: string;
     adminOnly?: boolean;
+    firmOnly?: boolean;            // hidden for personal accounts
+    personal?: { name: string; icon: React.ReactNode };   // how a personal account sees it
     userOnly?: boolean;
     subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
 };
@@ -25,10 +28,10 @@ const navItems: NavItem[] = [
         name: "Panou",
         path: "/dashboard",
     },
-    { icon: <Truck />, name: "Flotă", path: "/fleet" },
+    { icon: <Truck />, name: "Flotă", path: "/fleet", personal: { name: "Mașinile mele", icon: <Car /> } },
     { icon: <FileText />, name: "Acte & expirări", path: "/documents" },
-    { icon: <Users />, name: "Șoferi", path: "/drivers" },
-    { icon: <Wallet />, name: "Financiar", path: "/finance" },
+    { icon: <Users />, name: "Șoferi", path: "/drivers", firmOnly: true },
+    { icon: <Wallet />, name: "Financiar", path: "/finance", firmOnly: true },
     { icon: <Settings />, name: "Setări", path: "/settings" },
     { icon: <ShieldCheck />, name: "Admin", path: "/admin", adminOnly: true },
 ];
@@ -55,7 +58,10 @@ const AppSidebar: React.FC = () => {
 
     // The server is what refuses /admin to non-admins; this only hides the link.
     const { isAdmin } = useCurrentUser();
-    const visibleItems = navItems.filter((item) => !item.adminOnly || isAdmin);
+    const { personal } = useAccountType();
+    const visibleItems = navItems
+        .filter((item) => (!item.adminOnly || isAdmin) && !(personal && item.firmOnly))
+        .map((item) => (personal && item.personal ? { ...item, ...item.personal } : item));
 
     useEffect(() => {
         let submenuMatched = false;

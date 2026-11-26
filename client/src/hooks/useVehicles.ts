@@ -16,6 +16,7 @@ export const useVehicles = () => {
         vehicles,
         trucks: vehicles.filter((v) => v.kind === 'TRUCK'),
         trailers: vehicles.filter((v) => v.kind === 'TRAILER'),
+        cars: vehicles.filter((v) => v.kind === 'CAR'),
         isLoading,
         isError,
         create,
