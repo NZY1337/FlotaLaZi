@@ -137,6 +137,11 @@ Landing details:
   use framer-motion and always respect `useReducedMotion()` (reduced motion =
   the final, still picture). Scroll-in animations use `whileInView` with
   `viewport={{ once: true }}` (see `Core.tsx`).
+- `PromoBanner.tsx`: a moving strip at the top of the fixed `Navbar`
+  announcing `/masina` (hidden on `/masina`; closing it is remembered in
+  `localStorage`; still with reduced motion). The menu has a "Mașina ta ·
+  Nou" link; the full menu shows from `xl`, a hamburger below it. The hero
+  leaves room for banner + navbar (`pt-36`).
 - Prices live in `Pricing.tsx` only (and §10 below); the FAQ, hero and CTA
   mention the free plan in words — keep them in step.
 - SEO: title, description, canonical and Open Graph tags are in

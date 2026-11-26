@@ -4,7 +4,7 @@ import HeroMockup from './HeroMockup';
 
 export default function Hero() {
     return (
-        <section className="relative min-h-screen flex items-center pt-28 pb-16 lg:pt-20 overflow-hidden bg-white">
+        <section className="relative min-h-screen flex items-center pt-36 pb-16 overflow-hidden bg-white">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[20vw] font-black text-gray-100 pointer-events-none select-none uppercase">FLOTA</div>
             <div className="absolute top-[15%] right-[35%] w-32 h-32 bg-[#465fff]/20 -z-10" />
 
