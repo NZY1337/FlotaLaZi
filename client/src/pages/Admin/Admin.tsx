@@ -49,7 +49,7 @@ export default function Admin() {
                                 <th className="px-5 py-2 font-medium">Alerte email</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="text-gray-700 dark:text-gray-300">
                             {clients.map((c) => (
                                 <tr key={c.id} className="border-b border-gray-100 last:border-0 dark:border-gray-800">
                                     <td className="px-5 py-3">
