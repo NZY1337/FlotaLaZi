@@ -6,8 +6,8 @@ export default function ForgotPassword() {
     return (
         <>
             <PageMeta
-                title="Forgot Password | FlotaLaZi"
-                description="Request a password reset link for your FlotaLaZi account"
+                title="Am uitat parola - FlotaLaZi"
+                description="Cere un link pentru resetarea parolei contului FlotaLaZi."
             />
             <AuthLayout>
                 <ForgotPasswordForm />
