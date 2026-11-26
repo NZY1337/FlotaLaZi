@@ -6,7 +6,8 @@ import { Link } from 'react-router';
 // Launch prices, in lei — change them here (and in CLAUDE.md §10).
 // Plans differ only in how many trucks they cover: every feature is in every
 // plan, and trailers, drivers and documents are unlimited. The app does not
-// enforce plans yet (no billing): this is the price list we sell with.
+// enforce plans yet (no billing): until it does, the page says everything is
+// free during the test period, and these are the prices from launch.
 const plans = [
     {
         name: 'Gratuit',
@@ -21,7 +22,7 @@ const plans = [
         description: 'Pentru firme cu 2–5 camioane',
         price: { monthly: '39', yearly: '390' },
         unit: { monthly: 'lei / lună', yearly: 'lei / an' },
-        cta: 'Încearcă gratuit',
+        cta: 'Începe gratuit',
         trucks: 'Până la 5 camioane',
     },
     {
@@ -30,7 +31,7 @@ const plans = [
         price: { monthly: '79', yearly: '790' },
         unit: { monthly: 'lei / lună', yearly: 'lei / an' },
         popular: true,
-        cta: 'Încearcă gratuit',
+        cta: 'Începe gratuit',
         trucks: 'Până la 10 camioane',
     },
     {
@@ -38,7 +39,7 @@ const plans = [
         description: 'Peste 10 camioane',
         price: { monthly: '149', yearly: '1.490' },
         unit: { monthly: 'lei / lună', yearly: 'lei / an' },
-        cta: 'Încearcă gratuit',
+        cta: 'Începe gratuit',
         trucks: 'Camioane nelimitate',
         extra: 'Te ajutăm să introduci datele',
     },
@@ -72,6 +73,10 @@ export default function Pricing() {
                             Anual <span className="text-white bg-[#465fff] px-2 py-0.5 ml-2">2 luni gratis</span>
                         </button>
                     </div>
+                    <p className="mt-10 max-w-3xl border-2 border-black bg-[#465fff]/10 px-5 py-4 text-base font-bold text-black">
+                        În perioada de testare, FlotaLaZi e gratuit pentru toată lumea, oricâte camioane ai.
+                        Prețurile de mai jos se aplică de la lansare și te anunțăm din timp, pe email.
+                    </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8">
