@@ -386,8 +386,10 @@ describeDb('FlotaLaZi API (e2e)', () => {
 
         const [db1] = await db.query(`SELECT (SELECT count(*) FROM users)::int AS users,
             (SELECT count(*) FROM vehicles WHERE kind = 'TRUCK')::int AS trucks,
+            (SELECT count(*) FROM vehicles WHERE kind = 'CAR')::int AS cars,
+            (SELECT count(*) FROM fleet_settings WHERE "accountType" = 'PERSONAL')::int AS personal,
             (SELECT count(*) FROM transactions)::int AS transactions`);
-        expect(body.totals).toMatchObject({ users: db1.users, trucks: db1.trucks, transactions: db1.transactions });
+        expect(body.totals).toMatchObject({ users: db1.users, trucks: db1.trucks, cars: db1.cars, personalUsers: db1.personal, transactions: db1.transactions });
         expect(body.totals.activeUsers7d).toBeGreaterThanOrEqual(2);
     });
 

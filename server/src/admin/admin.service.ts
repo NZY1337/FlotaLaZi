@@ -29,6 +29,8 @@ export type AdminOverview = {
         activeUsers7d: number;
         trucks: number;
         trailers: number;
+        cars: number;
+        personalUsers: number;
         drivers: number;
         documents: number;
         transactions: number;
@@ -84,7 +86,7 @@ export class AdminService {
 
         const now = Date.now();
         const within = (iso: string, days: number) => now - new Date(iso).getTime() <= days * 86_400_000;
-        const sum = (key: 'trucks' | 'trailers' | 'drivers' | 'documents' | 'transactions') =>
+        const sum = (key: 'trucks' | 'trailers' | 'cars' | 'drivers' | 'documents' | 'transactions') =>
             clients.reduce((a, c) => a + c[key], 0);
 
         // "Today" as the owner sees it: since midnight in Romania.
@@ -101,6 +103,8 @@ export class AdminService {
                 activeUsers7d: clients.filter((c) => within(c.lastSeenAt, 7)).length,
                 trucks: sum('trucks'),
                 trailers: sum('trailers'),
+                cars: sum('cars'),
+                personalUsers: clients.filter((c) => c.accountType === 'PERSONAL').length,
                 drivers: sum('drivers'),
                 documents: sum('documents'),
                 transactions: sum('transactions'),
