@@ -35,6 +35,13 @@ What the platform does:
    channel (see §10) — not built yet.
 7. Import of the legacy single-file EuroTrack/"Flota Mea" JSON backup.
 
+Secondary audience (an experiment for traffic, not a second product): people
+with **one personal car**, on the public page `/masina` — the same document
+reminders (ITP, RCA, rovinietă…), one vehicle free for ever. The app itself
+still speaks transport ("camion", "Flotă"); a simplified personal mode
+(account type at sign-up, an `Autoturism` vehicle kind, no Financiar/Șoferi)
+is built only if `/masina` brings real sign-ups.
+
 What the platform explicitly is **not**:
 
 - Not GPS / telematics — "no hardware" is a selling point, not a gap.
@@ -116,7 +123,9 @@ Routes:
 /admin       Admin        (platform owner only: clients, usage counts)
 ```
 
-`/` is the public landing page (`components/Landing/`, same neo-brutalist
+`/masina` is the public page for a personal car (`Landing/Masina.tsx`,
+reuses `Navbar` and `Footer`, whose section links point at `/#…` so they
+work from any page). `/` is the public landing page (`components/Landing/`, same neo-brutalist
 style as the old Streamloop homepage; photos hotlinked from Pexels/Unsplash,
 credited in the footer, URLs in `Landing/images.ts`). `ProtectedRoute` sends
 signed-out users to `/signin` — never to `/`.
@@ -134,11 +143,13 @@ Landing details:
   `client/index.html` itself (crawlers and WhatsApp/Facebook previews don't
   run JS); `public/og-image.png` (1200×630) is the link preview,
   `public/robots.txt` keeps the logged-in pages out, `public/sitemap.xml`
-  lists `/` and `/signup` (submitted in Google Search Console — the
-  `flotalazi.ro` Domain property, verified by a TXT record at Netim).
-  `PageMeta` (react-helmet-async) only changes the **title**: its
-  description never reaches the page with React 19, so the description in
-  `index.html` is the site's description.
+  lists `/`, `/masina` and `/signup` (submitted in Google Search Console —
+  the `flotalazi.ro` Domain property, verified by a TXT record at Netim).
+  `PageMeta` sets the title through react-helmet-async and writes the
+  description straight into the `<meta name="description">` of
+  `index.html` (Helmet's own meta never reaches the page with React 19),
+  putting the site's description back when the page unmounts. Crawlers
+  that don't run JS see only the `index.html` description.
 
 Form inputs (`components/fleet/ui.tsx`) — use these, never a native
 `type="number"` or `type="date"` input:
@@ -348,6 +359,9 @@ free):
 | Mic     | up to 5    | 39 lei   | 390 lei   |
 | Flotă   | up to 10   | 79 lei   | 790 lei   |
 | Mare    | unlimited  | 149 lei  | 1.490 lei |
+
+Personal car (`/masina`): one vehicle free for ever; each extra vehicle
+25 lei **per year** (a monthly 5 lei would lose ~20% to card fees).
 
 Set against FlotaDesk (the closest competitor: 39 / 89 / 179 RON per month for
 5 / 10 / unlimited vehicles, 14-day trial, email-only alerts). There is **no

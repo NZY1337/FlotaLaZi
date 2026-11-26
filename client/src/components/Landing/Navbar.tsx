@@ -6,10 +6,10 @@ import { useAppContext } from '../../context/AppContext';
 import Logo from './Logo';
 
 const links = [
-    { href: '#functii', label: 'Funcții' },
-    { href: '#cum-functioneaza', label: 'Cum funcționează' },
-    { href: '#preturi', label: 'Prețuri' },
-    { href: '#intrebari', label: 'Întrebări' },
+    { href: '/#functii', label: 'Funcții' },
+    { href: '/#cum-functioneaza', label: 'Cum funcționează' },
+    { href: '/#preturi', label: 'Prețuri' },
+    { href: '/#intrebari', label: 'Întrebări' },
 ];
 
 export default function Navbar() {

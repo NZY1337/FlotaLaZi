@@ -15,10 +15,11 @@ export default function Footer() {
                     <div>
                         <h4 className="font-bold uppercase tracking-tight mb-6">Produs</h4>
                         <ul className="space-y-3 text-sm font-bold text-gray-400">
-                            <li><a href="#functii" className="hover:text-black transition-colors">Funcții</a></li>
-                            <li><a href="#cum-functioneaza" className="hover:text-black transition-colors">Cum funcționează</a></li>
-                            <li><a href="#preturi" className="hover:text-black transition-colors">Prețuri</a></li>
-                            <li><a href="#intrebari" className="hover:text-black transition-colors">Întrebări</a></li>
+                            <li><a href="/#functii" className="hover:text-black transition-colors">Funcții</a></li>
+                            <li><a href="/#cum-functioneaza" className="hover:text-black transition-colors">Cum funcționează</a></li>
+                            <li><a href="/#preturi" className="hover:text-black transition-colors">Prețuri</a></li>
+                            <li><a href="/#intrebari" className="hover:text-black transition-colors">Întrebări</a></li>
+                            <li><Link to="/masina" className="hover:text-black transition-colors">Pentru mașina personală</Link></li>
                         </ul>
                     </div>
                     <div>
