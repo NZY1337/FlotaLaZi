@@ -11,17 +11,19 @@ const str = (v: number | string | null | undefined) => (v == null ? '' : String(
 export default function VehicleFormModal({ isOpen, onClose, kind, vehicle }: Props) {
     const { trailers, create, update } = useVehicles();
     const isTruck = kind === 'TRUCK';
-    const [form, setForm] = useState(() => initial(vehicle));
+    const isCar = kind === 'CAR';
+    const hasEngine = kind !== 'TRAILER';
+    const [form, setForm] = useState(() => initial(vehicle, kind));
     const mutation = vehicle ? update : create;
 
     useEffect(() => {
         if (isOpen) {
-            setForm(initial(vehicle));
+            setForm(initial(vehicle, kind));
             create.reset();
             update.reset();
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps -- reset only when the modal opens
-    }, [isOpen, vehicle]);
+    }, [isOpen, vehicle, kind]);
 
     const set = (key: keyof typeof form) => (value: string) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -32,9 +34,9 @@ export default function VehicleFormModal({ isOpen, onClose, kind, vehicle }: Pro
             vin: form.vin,
             notes: form.notes,
         };
-        if (isTruck) {
+        if (hasEngine) {
             Object.assign(input, {
-                attachedTrailerId: form.attachedTrailerId || null,
+                ...(isTruck ? { attachedTrailerId: form.attachedTrailerId || null } : {}),
                 km: parseNumberInput(form.km, 0),
                 lastOilKm: parseNumberInput(form.lastOilKm, 0),
                 oilIntervalKm: parseNumberInput(form.oilIntervalKm, 0),
@@ -57,21 +59,21 @@ export default function VehicleFormModal({ isOpen, onClose, kind, vehicle }: Pro
         })),
     ];
 
-    const title = `${vehicle ? 'Editează' : 'Adaugă'} ${isTruck ? 'camion' : 'remorcă / semiremorcă'}`;
+    const title = `${vehicle ? 'Editează' : 'Adaugă'} ${isCar ? 'mașină' : isTruck ? 'camion' : 'remorcă / semiremorcă'}`;
 
     return (
         <FormModal title={title} isOpen={isOpen} onClose={onClose} onSubmit={submit} pending={mutation.isPending} error={mutation.error}>
             <Row>
-                <TextField label="Nr. înmatriculare" value={form.plate} onChange={set('plate')} required uppercase placeholder="ex: NT 08 RGT" />
-                {isTruck
-                    ? <TextField label="Marcă / model" value={form.name} onChange={set('name')} placeholder="ex: Scania R500" />
+                <TextField label="Nr. înmatriculare" value={form.plate} onChange={set('plate')} required uppercase placeholder={isCar ? 'ex: B 123 ABC' : 'ex: NT 08 RGT'} />
+                {hasEngine
+                    ? <TextField label="Marcă / model" value={form.name} onChange={set('name')} placeholder={isCar ? 'ex: Dacia Logan' : 'ex: Scania R500'} />
                     : <SelectField label="Tip" value={form.trailerType} onChange={set('trailerType')} options={[{ value: 'SEMIREMORCA', label: 'Semiremorcă' }, { value: 'REMORCA', label: 'Remorcă' }]} />}
             </Row>
-            {!isTruck && <TextField label="Marcă / caroserie" value={form.name} onChange={set('name')} placeholder="ex: Schmitz Cargobull prelată" />}
+            {!hasEngine && <TextField label="Marcă / caroserie" value={form.name} onChange={set('name')} placeholder="ex: Schmitz Cargobull prelată" />}
             <TextField label="Serie șasiu (VIN)" value={form.vin} onChange={set('vin')} uppercase placeholder="opțional" />
-            {isTruck && (
+            {hasEngine && (
                 <>
-                    <SelectField label="Remorcă cuplată" value={form.attachedTrailerId} onChange={set('attachedTrailerId')} options={trailerOptions} />
+                    {isTruck && <SelectField label="Remorcă cuplată" value={form.attachedTrailerId} onChange={set('attachedTrailerId')} options={trailerOptions} />}
                     <NumberField label="Kilometraj actual" unit="km" min={0} value={form.km} onChange={set('km')} />
                     <Row>
                         <NumberField label="Ultimul schimb de ulei la (km)" unit="km" min={0} value={form.lastOilKm} onChange={set('lastOilKm')} />
@@ -83,12 +85,13 @@ export default function VehicleFormModal({ isOpen, onClose, kind, vehicle }: Pro
                     </Row>
                 </>
             )}
-            <TextField label="Observații" value={form.notes} onChange={set('notes')} placeholder={isTruck ? 'opțional' : 'ex: axe SAF, anvelope 385/65 R22.5'} />
+            <TextField label="Observații" value={form.notes} onChange={set('notes')} placeholder={hasEngine ? 'opțional' : 'ex: axe SAF, anvelope 385/65 R22.5'} />
         </FormModal>
     );
 }
 
-function initial(v?: Vehicle | null) {
+// Usual oil intervals for a new vehicle: a truck ~50.000 km, a car ~15.000 km.
+function initial(v: Vehicle | null | undefined, kind: VehicleKind) {
     return {
         plate: v?.plate ?? '',
         name: v?.name ?? '',
@@ -98,7 +101,7 @@ function initial(v?: Vehicle | null) {
         attachedTrailerId: v?.attachedTrailerId ?? '',
         km: str(v?.km),
         lastOilKm: str(v?.lastOilKm),
-        oilIntervalKm: v ? str(v.oilIntervalKm) : '50000',
+        oilIntervalKm: v ? str(v.oilIntervalKm) : kind === 'CAR' ? '15000' : '50000',
         lastOilDate: v?.lastOilDate ?? '',
         oilIntervalMonths: v ? str(v.oilIntervalMonths) : '12',
     };

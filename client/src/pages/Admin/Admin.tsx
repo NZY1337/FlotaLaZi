@@ -8,7 +8,7 @@ import type { AdminClient } from '../../services/admin';
 // Platform owner's view: who signed up, who uses the app, how much they keep in
 // it. Counts only — no client's amounts or documents.
 
-const started = (c: AdminClient) => c.trucks + c.trailers + c.documents + c.transactions > 0;
+const started = (c: AdminClient) => c.trucks + c.trailers + c.cars + c.documents + c.transactions > 0;
 
 export default function Admin() {
     const { overview, isLoading, isError } = useAdminOverview();
@@ -27,9 +27,9 @@ export default function Admin() {
             <PageHeader title="Admin" subtitle="Clienții tăi și cât folosesc aplicația." />
 
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-                <StatCard label="Clienți" value={totals.users} sub={`+${totals.newUsers7d} în 7 zile · +${totals.newUsers30d} în 30 de zile`} />
+                <StatCard label="Clienți" value={totals.users} sub={`+${totals.newUsers7d} în 7 zile · ${totals.personalUsers} persoane fizice`} />
                 <StatCard label="Activi (7 zile)" value={totals.activeUsers7d} tone="green" />
-                <StatCard label="Camioane / remorci" value={`${totals.trucks} / ${totals.trailers}`} sub={`${totals.drivers} șoferi`} />
+                <StatCard label="Camioane / remorci" value={`${totals.trucks} / ${totals.trailers}`} sub={`${totals.cars} mașini · ${totals.drivers} șoferi`} />
                 <StatCard label="Alerte trimise azi" value={totals.alertsToday} sub={`${totals.documents} acte · ${totals.transactions} tranzacții`} />
             </div>
 
@@ -39,10 +39,12 @@ export default function Admin() {
                         <thead>
                             <tr className="border-b border-gray-100 text-left text-xs text-gray-500 dark:border-gray-800">
                                 <th className="px-5 py-2 font-medium">Client</th>
+                                <th className="px-3 py-2 font-medium">Tip</th>
                                 <th className="px-3 py-2 font-medium">Înregistrat</th>
                                 <th className="px-3 py-2 font-medium">Ultima activitate</th>
                                 <th className="px-3 py-2 text-right font-medium">Camioane</th>
                                 <th className="px-3 py-2 text-right font-medium">Remorci</th>
+                                <th className="px-3 py-2 text-right font-medium">Mașini</th>
                                 <th className="px-3 py-2 text-right font-medium">Șoferi</th>
                                 <th className="px-3 py-2 text-right font-medium">Acte</th>
                                 <th className="px-3 py-2 text-right font-medium">Tranzacții</th>
@@ -60,10 +62,12 @@ export default function Admin() {
                                         </p>
                                         <p className="text-xs text-gray-500">{c.email}</p>
                                     </td>
+                                    <td className="px-3 py-3 text-gray-600 dark:text-gray-300">{c.accountType === 'PERSONAL' ? 'Persoană' : 'Firmă'}</td>
                                     <td className="px-3 py-3 text-gray-600 dark:text-gray-300">{formatDate(c.createdAt.slice(0, 10))}</td>
                                     <td className="px-3 py-3 text-gray-600 dark:text-gray-300">{sinceLabel(c.lastSeenAt)}</td>
                                     <td className="px-3 py-3 text-right tabular-nums">{c.trucks}</td>
                                     <td className="px-3 py-3 text-right tabular-nums">{c.trailers}</td>
+                                    <td className="px-3 py-3 text-right tabular-nums">{c.cars}</td>
                                     <td className="px-3 py-3 text-right tabular-nums">{c.drivers}</td>
                                     <td className="px-3 py-3 text-right tabular-nums">{c.documents}</td>
                                     <td className="px-3 py-3 text-right tabular-nums">{c.transactions}</td>

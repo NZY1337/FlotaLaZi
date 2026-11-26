@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
-import { Vehicle, VehicleKind } from './entities/vehicle.entity';
+import { Vehicle, VehicleKind, hasEngine } from './entities/vehicle.entity';
 import { CreateVehicleDto, OilChangeDto, UpdateVehicleDto } from './dto/vehicle.dto';
 import { SettingsService } from '../settings/settings.service';
 import { TransactionsService } from '../transactions/transactions.service';
@@ -10,7 +10,7 @@ import { oilStatus } from '../fleet/status';
 import { todayYmd } from '../fleet/dates';
 import { found } from '../fleet/owned';
 
-const TRUCK_ONLY = ['attachedTrailerId', 'km', 'lastOilKm', 'oilIntervalKm', 'lastOilDate', 'oilIntervalMonths'] as const;
+const ENGINE_ONLY = ['attachedTrailerId', 'km', 'lastOilKm', 'oilIntervalKm', 'lastOilDate', 'oilIntervalMonths'] as const;
 
 export const OIL_CHANGE_CATEGORY = 'Schimb ulei';
 
@@ -22,7 +22,7 @@ export class VehiclesService {
         private readonly transactions: TransactionsService,
     ) { }
 
-    /** Vehicles with their computed oil status (trucks) and coupling info. */
+    /** Vehicles with their computed oil status (trucks, cars) and coupling info. */
     async list(ownerId: string) {
         const [vehicles, settings] = await Promise.all([
             // Postgres sorts enums by declaration order: trucks first.
@@ -32,7 +32,7 @@ export class VehiclesService {
         const today = todayYmd();
         const byId = new Map(vehicles.map((v) => [v.id, v]));
         return vehicles.map((v) => {
-            if (v.kind === VehicleKind.TRUCK) {
+            if (hasEngine(v.kind)) {
                 return { ...v, oil: oilStatus(v, settings.oilAlertKm, today), attachedTrailer: this.ref(v.attachedTrailerId ? byId.get(v.attachedTrailerId) : undefined) };
             }
             const truck = vehicles.find((t) => t.attachedTrailerId === v.id) ?? null;
@@ -49,14 +49,15 @@ export class VehiclesService {
         if (trailer.kind !== VehicleKind.TRAILER) throw new BadRequestException('attachedTrailerId must point to a trailer');
     }
 
-    /** Applies kind rules: trailers never carry truck fields and vice versa. */
+    /** Applies kind rules: trailers carry no engine fields, only trucks pull a trailer. */
     private clean(kind: VehicleKind, dto: UpdateVehicleDto): UpdateVehicleDto {
         const data: UpdateVehicleDto = { ...dto };
         if (kind === VehicleKind.TRAILER) {
-            for (const key of TRUCK_ONLY) delete data[key];
+            for (const key of ENGINE_ONLY) delete data[key];
         } else {
             delete data.trailerType;
         }
+        if (kind === VehicleKind.CAR) delete data.attachedTrailerId;
         return data;
     }
 
@@ -97,7 +98,7 @@ export class VehiclesService {
     /** Records an oil change: resets the counters and optionally logs the cost. */
     async oilChange(ownerId: string, id: string, dto: OilChangeDto) {
         const vehicle = found(await this.repo.findOneBy({ id, ownerId }), 'Vehicle');
-        if (vehicle.kind !== VehicleKind.TRUCK) throw new BadRequestException('Only trucks have oil changes');
+        if (!hasEngine(vehicle.kind)) throw new BadRequestException('Trailers have no oil changes');
         vehicle.km = Math.max(vehicle.km ?? 0, dto.km);
         vehicle.lastOilKm = dto.km;
         vehicle.lastOilDate = dto.date;

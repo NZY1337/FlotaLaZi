@@ -2,7 +2,7 @@ import { apiFetch, jsonBody } from '../api';
 import type { Currency } from '../transactions';
 
 export type Level = 'red' | 'yellow' | 'green';
-export type VehicleKind = 'TRUCK' | 'TRAILER';
+export type VehicleKind = 'TRUCK' | 'TRAILER' | 'CAR';
 export type TrailerType = 'SEMIREMORCA' | 'REMORCA';
 
 export type OilStatus = {

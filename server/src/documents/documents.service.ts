@@ -6,6 +6,7 @@ import { Vehicle } from '../vehicles/entities/vehicle.entity';
 import { Driver } from '../drivers/entities/driver.entity';
 import { CreateDocumentDto, UpdateDocumentDto } from './dto/document.dto';
 import { SettingsService } from '../settings/settings.service';
+import { ownDocumentsLabel } from '../settings/entities/fleet-settings.entity';
 import { expiryStatus } from '../fleet/status';
 import { todayYmd } from '../fleet/dates';
 import { found } from '../fleet/owned';
@@ -13,7 +14,7 @@ import { found } from '../fleet/owned';
 export type DocumentWithStatus = FleetDocument & {
     daysLeft: number;
     level: 'red' | 'yellow' | 'green';
-    /** Plate or driver name, "Firmă" for firm-level documents. */
+    /** Plate or driver name; "Firmă" (or "Personal") for the account's own documents. */
     subject: string;
 };
 
@@ -26,21 +27,25 @@ export class DocumentsService {
         private readonly settings: SettingsService,
     ) { }
 
-    static withStatus(doc: FleetDocument, today: string): DocumentWithStatus {
+    static withStatus(doc: FleetDocument, today: string, ownLabel = 'Firmă'): DocumentWithStatus {
         const { vehicle, driver, ...rest } = doc;
-        const subject = vehicle?.plate ?? driver?.name ?? 'Firmă';
+        const subject = vehicle?.plate ?? driver?.name ?? ownLabel;
         return { ...rest, ...expiryStatus(doc.expiresOn, doc.alertDays, today), subject } as DocumentWithStatus;
     }
 
     /** All documents, most urgent first. */
     async list(ownerId: string): Promise<DocumentWithStatus[]> {
-        const docs = await this.repo.find({
-            where: { ownerId },
-            relations: { vehicle: true, driver: true },
-            order: { expiresOn: 'ASC' },
-        });
+        const [docs, settings] = await Promise.all([
+            this.repo.find({
+                where: { ownerId },
+                relations: { vehicle: true, driver: true },
+                order: { expiresOn: 'ASC' },
+            }),
+            this.settings.get(ownerId),
+        ]);
         const today = todayYmd();
-        return docs.map((d) => DocumentsService.withStatus(d, today));
+        const ownLabel = ownDocumentsLabel(settings.accountType);
+        return docs.map((d) => DocumentsService.withStatus(d, today, ownLabel));
     }
 
     private async assertSubject(ownerId: string, vehicleId: string | null | undefined, driverId: string | null | undefined) {

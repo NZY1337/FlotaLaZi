@@ -3,8 +3,9 @@ import { DateShortcuts, FormModal, SelectField, TextField, DateField } from './u
 import { useDocuments } from '../../hooks/useDocuments';
 import { useVehicles } from '../../hooks/useVehicles';
 import { useDrivers } from '../../hooks/useDrivers';
-import { useSettings } from '../../hooks/useSettings';
-import { DOCUMENT_TYPES, DRIVER_DOCUMENT_TYPES, plusMonthsInput } from '../../helpers/fleet';
+import { useAccountType, useSettings } from '../../hooks/useSettings';
+import { CAR_DOCUMENT_TYPES, DOCUMENT_TYPES, DRIVER_DOCUMENT_TYPES, PERSONAL_DOCUMENT_TYPES, plusMonthsInput } from '../../helpers/fleet';
+import type { Vehicle } from '../../services/vehicles';
 import type { FleetDocument } from '../../services/documents';
 
 type Props = {
@@ -21,11 +22,19 @@ const FIRM = 'firm';
 // The subject select encodes vehicle / driver / firm as "v:<id>" | "d:<id>" | "firm".
 const subjectOf = (d?: FleetDocument | null) => (d?.vehicleId ? `v:${d.vehicleId}` : d?.driverId ? `d:${d.driverId}` : FIRM);
 
+/** The usual document types for a subject; a personal account's own are ID papers. */
+function typesFor(subject: string, vehicles: Vehicle[], personal: boolean): string[] {
+    if (subject.startsWith('d:')) return DRIVER_DOCUMENT_TYPES;
+    if (subject.startsWith('v:')) return vehicles.find((v) => v.id === subject.slice(2))?.kind === 'CAR' ? CAR_DOCUMENT_TYPES : DOCUMENT_TYPES;
+    return personal ? PERSONAL_DOCUMENT_TYPES : DOCUMENT_TYPES;
+}
+
 export default function DocumentFormModal({ isOpen, onClose, document, subject }: Props) {
     const { create, update } = useDocuments();
     const { vehicles } = useVehicles();
     const { drivers } = useDrivers();
     const { settings } = useSettings();
+    const { personal } = useAccountType();
     const mutation = document ? update : create;
 
     const [subjectValue, setSubject] = useState(FIRM);
@@ -35,13 +44,12 @@ export default function DocumentFormModal({ isOpen, onClose, document, subject }
     const [alertDays, setAlertDays] = useState('30');
     const [notes, setNotes] = useState('');
 
-    const isDriver = subjectValue.startsWith('d:');
-    const typeList = isDriver ? DRIVER_DOCUMENT_TYPES : DOCUMENT_TYPES;
+    const typeList = typesFor(subjectValue, vehicles, personal);
 
     useEffect(() => {
         if (!isOpen) return;
         const subj = document ? subjectOf(document) : subject ?? (vehicles[0] ? `v:${vehicles[0].id}` : FIRM);
-        const list = subj.startsWith('d:') ? DRIVER_DOCUMENT_TYPES : DOCUMENT_TYPES;
+        const list = typesFor(subj, vehicles, personal);
         setSubject(subj);
         if (document) {
             const known = list.includes(document.type);
@@ -60,14 +68,14 @@ export default function DocumentFormModal({ isOpen, onClose, document, subject }
     }, [isOpen, document]);
 
     const subjectOptions = useMemo(() => [
-        ...vehicles.map((v) => ({ value: `v:${v.id}`, label: `${v.kind === 'TRUCK' ? '🚛' : '🚚'} ${v.plate}${v.name ? ` · ${v.name}` : ''}` })),
-        ...drivers.map((d) => ({ value: `d:${d.id}`, label: `👤 ${d.name}` })),
-        { value: FIRM, label: '🏢 Firmă (general)' },
-    ], [vehicles, drivers]);
+        ...vehicles.map((v) => ({ value: `v:${v.id}`, label: `${v.kind === 'CAR' ? '🚗' : v.kind === 'TRUCK' ? '🚛' : '🚚'} ${v.plate}${v.name ? ` · ${v.name}` : ''}` })),
+        ...(personal ? [] : drivers.map((d) => ({ value: `d:${d.id}`, label: `👤 ${d.name}` }))),
+        personal ? { value: FIRM, label: '👤 Eu (permis, buletin)' } : { value: FIRM, label: '🏢 Firmă (general)' },
+    ], [vehicles, drivers, personal]);
 
     const changeSubject = (value: string) => {
         setSubject(value);
-        const list = value.startsWith('d:') ? DRIVER_DOCUMENT_TYPES : DOCUMENT_TYPES;
+        const list = typesFor(value, vehicles, personal);
         if (typeChoice !== CUSTOM && !list.includes(typeChoice)) setTypeChoice(list[0]);
     };
 

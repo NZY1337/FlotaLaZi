@@ -1,5 +1,6 @@
 import { MAX_EUR_RATE } from '../../fleet/money';
-import { IsBoolean, IsInt, IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { IsBoolean, IsEnum, IsInt, IsNumber, IsOptional, Max, Min } from 'class-validator';
+import { AccountType } from '../entities/fleet-settings.entity';
 
 export class UpdateSettingsDto {
     @IsOptional()
@@ -23,4 +24,8 @@ export class UpdateSettingsDto {
     @IsOptional()
     @IsBoolean()
     emailAlerts?: boolean;
+
+    @IsOptional()
+    @IsEnum(AccountType)
+    accountType?: AccountType;
 }

@@ -5,11 +5,13 @@ import { ActionButton, EmptyState, PageHeader, Pills } from '../../components/fl
 import DocumentRow from '../../components/fleet/DocumentRow';
 import DocumentFormModal from '../../components/fleet/DocumentFormModal';
 import { useDocuments } from '../../hooks/useDocuments';
+import { useAccountType } from '../../hooks/useSettings';
 import type { FleetDocument } from '../../services/documents';
 
 type Filter = 'all' | 'urgent';
 
 export default function Documents() {
+    const { personal } = useAccountType();
     const { documents, isLoading, isError, remove } = useDocuments();
     const [filter, setFilter] = useState<Filter>('all');
     const [editing, setEditing] = useState<FleetDocument | null | undefined>(undefined);
@@ -26,7 +28,7 @@ export default function Documents() {
             <PageMeta title="Acte - FlotaLaZi" description="Acte și date de expirare." />
             <PageHeader
                 title="Acte & expirări"
-                subtitle="ITP, RCA, rovinietă, tahograf, copie conformă, licențe și actele șoferilor."
+                subtitle={personal ? 'ITP, RCA, rovinietă, CASCO și actele tale.' : 'ITP, RCA, rovinietă, tahograf, copie conformă, licențe și actele șoferilor.'}
                 actions={<ActionButton onClick={() => setEditing(null)}>+ Adaugă act</ActionButton>}
             />
 

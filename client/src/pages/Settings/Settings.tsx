@@ -1,14 +1,16 @@
 import { useEffect, useState, type ChangeEvent } from 'react';
 import PageMeta from '../../components/common/PageMeta';
 import Alert from '../../components/ui/alert/Alert';
-import { ActionButton, Card, ErrorText, NumberField, PageHeader, TextField } from '../../components/fleet/ui';
+import { ActionButton, Card, ErrorText, NumberField, PageHeader, SelectField, TextField } from '../../components/fleet/ui';
 import { useLegacyImport, useSettings } from '../../hooks/useSettings';
+import type { AccountType } from '../../services/settings';
 import TestRemindersCard from '../../components/fleet/TestRemindersCard';
 import type { ImportResult } from '../../services/legacyImport';
 import { parseNumberInput } from '../../helpers/fleet';
 
 export default function Settings() {
     const { settings, isError, update } = useSettings();
+    const personal = settings?.accountType === 'PERSONAL';
     const importBackup = useLegacyImport();
     const [form, setForm] = useState({ eurRate: '', oilAlertKm: '', docAlertDays: '', emailAlerts: true });
     const [saved, setSaved] = useState(false);
@@ -55,16 +57,21 @@ export default function Settings() {
     return (
         <>
             <PageMeta title="Setări - FlotaLaZi" description="Curs valutar, alerte și import date." />
-            <PageHeader title="Setări" subtitle="Curs valutar, alerte și importul datelor din aplicația veche." />
+            <PageHeader title="Setări" subtitle={personal ? 'Alerte și tipul contului.' : 'Curs valutar, alerte și importul datelor din aplicația veche.'} />
 
             {isError && <Alert variant="error" title="Eroare" message="Nu am putut încărca setările." />}
 
             <div className="grid gap-4 lg:grid-cols-2">
                 <Card title="⚙️ Setări generale">
                     <form className="flex flex-col gap-4" onSubmit={(e) => { e.preventDefault(); save(); }}>
-                        <TextField label="Curs valutar (1 EUR = ? RON)" type="number" step="0.0001" min={0.0001} max={20} value={form.eurRate} required
+                        {settings && (
+                            <SelectField label="Folosesc FlotaLaZi pentru" value={settings.accountType ?? 'FIRM'}
+                                onChange={(v) => update.mutate({ accountType: v as AccountType })}
+                                options={[{ value: 'FIRM', label: '🚛 Firma mea de transport' }, { value: 'PERSONAL', label: '🚗 Mașina mea (persoană fizică)' }]} />
+                        )}
+                        {!personal && <TextField label="Curs valutar (1 EUR = ? RON)" type="number" step="0.0001" min={0.0001} max={20} value={form.eurRate} required
                             onChange={(v) => setForm((f) => ({ ...f, eurRate: v }))}
-                            hint="Folosit pentru tranzacțiile noi. Cele vechi își păstrează cursul din ziua înregistrării." />
+                            hint="Folosit pentru tranzacțiile noi. Cele vechi își păstrează cursul din ziua înregistrării." />}
                         <NumberField label="Alertă schimb ulei (cu câți km înainte)" unit="km" min={0} value={form.oilAlertKm} required
                             onChange={(v) => setForm((f) => ({ ...f, oilAlertKm: v }))} />
                         <TextField label="Alertă acte implicită (cu câte zile înainte)" type="number" min={1} max={365} value={form.docAlertDays} required
@@ -75,8 +82,8 @@ export default function Settings() {
                             Trimite-mi alertele zilnice pe email
                         </label>
                         <p className="text-xs text-gray-500">
-                            Alertele vin la 8:00 cu {form.docAlertDays || 30}, 7 și 1 zi înainte de expirare, în ziua expirării și a doua zi.
-                            Alertele pe WhatsApp vin în curând.
+                            Alertele vin la 8:00: cu {form.docAlertDays || 30} de zile înainte de expirare, apoi cu 7 zile, cu o zi, în ziua expirării și a doua zi.
+                            Un act rămas expirat îți e amintit o dată pe săptămână. Alertele pe WhatsApp vin în curând.
                         </p>
                         <ErrorText error={update.error} />
                         {saved && <p className="text-sm text-success-600">✓ Setări salvate.</p>}
@@ -86,7 +93,7 @@ export default function Settings() {
 
                 <TestRemindersCard />
 
-                <Card title="⬆️ Import din aplicația veche (Flota Mea)">
+                {!personal && <Card title="⬆️ Import din aplicația veche (Flota Mea)">
                     <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
                         În aplicația veche: <strong>Backup &amp; Setări → Salvează Backup (.json)</strong>. Apoi încarcă fișierul aici.
                         Importul se face o singură dată, într-un cont fără vehicule sau tranzacții.
@@ -105,7 +112,7 @@ export default function Settings() {
                             </p>
                         )}
                     </div>
-                </Card>
+                </Card>}
             </div>
         </>
     );
