@@ -13,6 +13,7 @@ import Finance from "./pages/Finance/Finance";
 import Settings from "./pages/Settings/Settings";
 import Admin from "./pages/Admin/Admin";
 import Landing from "./components/Landing";
+import Masina from "./components/Landing/Masina";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import RedirectIfAuthenticated from "./components/common/RedirectIfAuthenticated";
 
@@ -22,6 +23,7 @@ export default function App() {
             <Router>
                 <Routes>
                     <Route path="/" element={<Landing />} />
+                    <Route path="/masina" element={<Masina />} />
 
                     <Route element={<ProtectedRoute />}>
                         <Route element={<AppLayout />}>
