@@ -119,3 +119,13 @@ export const parseNumberInput = (input: string, maxDecimals: number): number | n
 /** How a parsed number reads back in Romanian: 1500.5 → "1.500,50". */
 export const formatNumberInput = (n: number, decimals: number) =>
     n.toLocaleString('ro-RO', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+
+/** "azi", "ieri", "acum 5 zile", "acum 3 luni" for an ISO moment, by calendar days. */
+export const sinceLabel = (iso: string, now: Date = new Date()) => {
+    const day = (d: Date) => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+    const days = Math.round((day(now) - day(new Date(iso))) / 86_400_000);
+    if (days <= 0) return 'azi';
+    if (days === 1) return 'ieri';
+    if (days < 60) return `acum ${days} zile`;
+    return `acum ${Math.round(days / 30)} luni`;
+};

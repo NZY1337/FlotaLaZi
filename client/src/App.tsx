@@ -11,6 +11,7 @@ import Documents from "./pages/Documents/Documents";
 import Drivers from "./pages/Drivers/Drivers";
 import Finance from "./pages/Finance/Finance";
 import Settings from "./pages/Settings/Settings";
+import Admin from "./pages/Admin/Admin";
 import Landing from "./components/Landing";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import RedirectIfAuthenticated from "./components/common/RedirectIfAuthenticated";
@@ -30,6 +31,7 @@ export default function App() {
                             <Route path="/drivers" element={<Drivers />} />
                             <Route path="/finance" element={<Finance />} />
                             <Route path="/settings" element={<Settings />} />
+                            <Route path="/admin" element={<Admin />} />
                         </Route>
                     </Route>
 
