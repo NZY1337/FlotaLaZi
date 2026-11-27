@@ -3,6 +3,7 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Fleet from "../../pages/Fleet/Fleet";
 import Home from "../../pages/Dashboard/Home";
+import Settings from "../../pages/Settings/Settings";
 import { useAppContext } from "../../context/AppContext";
 import { buildAppContextValue } from "../auth/test-utils";
 import { buildVehicle, mockApi, renderPage, session } from "./test-utils";
@@ -95,5 +96,22 @@ describe("Personal accounts", () => {
         expect(screen.queryByText(/Încasări/)).not.toBeInTheDocument();
         expect(screen.queryByText(/Ultimele cheltuieli/)).not.toBeInTheDocument();
         expect(screen.queryByRole("button", { name: "+ Încasare" })).not.toBeInTheDocument();
+    });
+    it("can switch the account type in Setări only while the account is empty", async () => {
+        mockApi({
+            "GET /settings": { accountType: "PERSONAL", docAlertDays: 30, oilAlertKm: 5000, eurRate: 4.97, emailAlerts: true },
+            "GET /dashboard": emptyDashboard,
+        });
+        const empty = renderPage(<Settings />);
+        expect(await screen.findByLabelText("Folosesc FlotaLaZi pentru")).toBeInTheDocument();
+        empty.unmount();
+
+        mockApi({
+            "GET /settings": { accountType: "PERSONAL", docAlertDays: 30, oilAlertKm: 5000, eurRate: 4.97, emailAlerts: true },
+            "GET /dashboard": { ...emptyDashboard, counts: { trucks: 0, trailers: 0, cars: 1, drivers: 0 } },
+        });
+        renderPage(<Settings />);
+        expect(await screen.findByText("🚗 Mașina mea (persoană fizică)")).toBeInTheDocument();
+        expect(screen.queryByLabelText("Folosesc FlotaLaZi pentru")).not.toBeInTheDocument();
     });
 });

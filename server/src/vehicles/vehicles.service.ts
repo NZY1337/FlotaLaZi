@@ -4,6 +4,7 @@ import { EntityManager, Repository } from 'typeorm';
 import { Vehicle, VehicleKind, hasEngine } from './entities/vehicle.entity';
 import { CreateVehicleDto, OilChangeDto, UpdateVehicleDto } from './dto/vehicle.dto';
 import { SettingsService } from '../settings/settings.service';
+import { vehicleKindsFor } from '../settings/entities/fleet-settings.entity';
 import { TransactionsService } from '../transactions/transactions.service';
 import { TransactionType } from '../transactions/entities/transaction.entity';
 import { oilStatus } from '../fleet/status';
@@ -63,6 +64,12 @@ export class VehiclesService {
 
     async create(ownerId: string, dto: CreateVehicleDto) {
         const { kind, ...rest } = dto;
+        const { accountType } = await this.settings.get(ownerId);
+        if (!vehicleKindsFor(accountType).includes(kind)) {
+            throw new BadRequestException(kind === VehicleKind.CAR
+                ? 'Mașinile se adaugă doar într-un cont personal. Un cont de firmă are camioane și remorci.'
+                : 'Un cont personal are doar mașini. Pentru camioane și remorci, alege „Firmă de transport” în Setări.');
+        }
         const data = this.clean(kind, rest);
         return this.repo.manager.transaction(async (manager) => {
             if (data.attachedTrailerId) {

@@ -510,15 +510,20 @@ describeDb('FlotaLaZi API (e2e)', () => {
         await as(P).post('/documents', { type: 'Permis de conducere', expiresOn: addDays(todayYmd(), 5) }).expect(201);
         expect((await as(P).get('/documents').expect(200)).body[0]).toMatchObject({ type: 'Permis de conducere', subject: 'Personal' });
 
+        // A person keeps cars only; trucks and trailers are a firm's (and its price).
+        await as(P).post('/vehicles', { kind: 'TRAILER', plate: 'B 99 REM' }).expect(400);
+        await as(P).post('/vehicles', { kind: 'TRUCK', plate: 'B 98 TIR' }).expect(400);
+        await as(P).post('/import/legacy', {}).expect(400);
         // A trailer id on a car is ignored: only trucks pull trailers.
-        const trailer = (await as(P).post('/vehicles', { kind: 'TRAILER', plate: 'B 99 REM' }).expect(201)).body.id;
-        const car = (await as(P).post('/vehicles', { kind: 'CAR', plate: 'b 123 abc', km: 50_000, lastOilKm: 40_000, oilIntervalKm: 15_000, attachedTrailerId: trailer }).expect(201)).body;
+        const car = (await as(P).post('/vehicles', { kind: 'CAR', plate: 'b 123 abc', km: 50_000, lastOilKm: 40_000, oilIntervalKm: 15_000, attachedTrailerId: trailerId }).expect(201)).body;
         expect(car).toMatchObject({ kind: 'CAR', plate: 'B 123 ABC', attachedTrailerId: null, trailerType: null });
+        // Switching to a firm would hide the car (and keep its alerts): refused until it is deleted.
+        expect((await as(P).patch('/settings', { accountType: 'FIRM' }).expect(400)).body.message).toMatch(/Ai mașini/);
 
         const listed = (await as(P).get('/vehicles').expect(200)).body.find((v: { id: string }) => v.id === car.id);
         expect(listed.oil).toMatchObject({ configured: true, kmLeft: 5_000, level: 'yellow' });
         const d = (await as(P).get('/dashboard').expect(200)).body;
-        expect(d.counts).toEqual({ trucks: 0, trailers: 1, cars: 1, drivers: 0 });
+        expect(d.counts).toEqual({ trucks: 0, trailers: 0, cars: 1, drivers: 0 });
         expect(d.oil).toEqual([expect.objectContaining({ plate: 'B 123 ABC', level: 'yellow' })]);
 
         // Cars are in the oil reminders like trucks.
@@ -529,8 +534,21 @@ describeDb('FlotaLaZi API (e2e)', () => {
         ]);
 
         await as(P).post(`/vehicles/${car.id}/oil-change`, { km: 51_000, date: todayYmd() }).expect(201);
-        await as(P).post(`/vehicles/${trailer}/oil-change`, { km: 1, date: todayYmd() }).expect(400);
         expect((await as(P).get('/dashboard').expect(200)).body.oil[0]).toMatchObject({ level: 'green', kmLeft: 15_000 });
+    });
+
+    it('a firm keeps trucks and trailers only, and switches to personal only when empty of them', async () => {
+        await as(A).post('/vehicles', { kind: 'CAR', plate: 'B 01 CAR' }).expect(400);
+        expect((await as(A).patch('/settings', { accountType: 'PERSONAL' }).expect(400)).body.message).toMatch(/camioane sau remorci/);
+        expect((await as(A).get('/settings').expect(200)).body.accountType).not.toBe('PERSONAL');
+
+        // Drivers are a firm's too: hidden ones would still send alerts.
+        const F = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+        const driver = (await as(F).post('/drivers', { name: 'Ion' }).expect(201)).body.id;
+        expect((await as(F).patch('/settings', { accountType: 'PERSONAL' }).expect(400)).body.message).toMatch(/șoferi/);
+        await as(F).delete(`/drivers/${driver}`).expect(204);
+        await as(F).patch('/settings', { accountType: 'PERSONAL' }).expect(200);
+        await as(F).patch('/settings', { accountType: 'FIRM' }).expect(200);
     });
 
     it('deleting a truck removes its documents and keeps its transactions', async () => {

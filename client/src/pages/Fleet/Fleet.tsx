@@ -177,10 +177,12 @@ export default function Fleet() {
                 </section>
             )}
 
-            {/* Cars of a firm account (service cars): shown only when there are some. */}
+            {/* A firm can't add cars (the server refuses them); cars from before that
+                rule stay visible so they can be deleted, never hidden with live alerts. */}
             {filter === 'all' && cars.length > 0 && (
                 <section className="mt-8">
-                    <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-gray-500">🚗 Autoturisme</h2>
+                    <h2 className="mb-1 text-sm font-semibold uppercase tracking-wide text-gray-500">🚗 Autoturisme</h2>
+                    <p className="mb-3 text-sm text-gray-500 dark:text-gray-400">Mașinile personale se țin într-un cont personal. Le poți șterge de aici.</p>
                     <div className="grid gap-4 lg:grid-cols-2">{cars.map(engineCard)}</div>
                 </section>
             )}

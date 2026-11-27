@@ -1,9 +1,9 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { DataSource } from 'typeorm';
 import { Vehicle } from '../vehicles/entities/vehicle.entity';
 import { FleetDocument } from '../documents/entities/document.entity';
 import { Transaction } from '../transactions/entities/transaction.entity';
-import { FleetSettings } from '../settings/entities/fleet-settings.entity';
+import { AccountType, FleetSettings } from '../settings/entities/fleet-settings.entity';
 import { SettingsService } from '../settings/settings.service';
 import { mapLegacyBackup } from './legacy-mapper';
 
@@ -17,7 +17,11 @@ export class LegacyImportService {
     /** Imports a legacy backup into an empty account, all-or-nothing. */
     async import(ownerId: string, backup: unknown) {
         const plan = mapLegacyBackup(backup);
-        await this.settings.get(ownerId);
+        const { accountType } = await this.settings.get(ownerId);
+        if (accountType === AccountType.PERSONAL) {
+            // The old app's backup is trucks and trailers: a firm's data.
+            throw new BadRequestException('Importul din aplicația veche e pentru conturile de firmă.');
+        }
 
         return this.dataSource.transaction(async (m) => {
             const existing = (await m.countBy(Vehicle, { ownerId })) + (await m.countBy(Transaction, { ownerId }));
