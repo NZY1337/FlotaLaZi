@@ -530,7 +530,7 @@ describeDb('FlotaLaZi API (e2e)', () => {
         const test = (await as(P).post('/reminders/test').expect(200)).body;
         expect(test.alerts).toEqual([
             expect.stringMatching(/^Permis de conducere — Personal: expiră în 5 zile/),
-            expect.stringMatching(/^Schimb ulei — B 123 ABC: mai sunt 5000 km/),
+            expect.stringMatching(/^Schimb ulei — B 123 ABC: mai sunt 5\.000 km/),
         ]);
 
         await as(P).post(`/vehicles/${car.id}/oil-change`, { km: 51_000, date: todayYmd() }).expect(201);
