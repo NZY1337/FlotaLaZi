@@ -43,6 +43,11 @@ account** (`FleetSettings.accountType = PERSONAL`) sees a simplified app:
 Setări; no Șoferi, no Financiar, no money on the dashboard. A new account
 picks firm or personal on its first, empty dashboard (`/signup?tip=personal`
 from `/masina` picks personal without asking); it can switch in Setări.
+Vehicle kinds are tied to the account type on the server
+(`vehicleKindsFor`): a firm keeps trucks and trailers only, a person cars
+only — otherwise a firm could keep a fleet of cars free beside its paid
+trucks. Switching type is refused while the account holds vehicles (or, to
+personal, drivers) the new type would hide: hidden ones would still alert.
 
 What the platform explicitly is **not**:
 
@@ -249,7 +254,7 @@ FleetSettings {            // one row per owner, created on first read
 
 Vehicle {
   id, ownerId
-  kind: 'TRUCK' | 'TRAILER' | 'CAR'        // CAR: personal accounts
+  kind: 'TRUCK' | 'TRAILER' | 'CAR'        // CAR: personal accounts only
   plate, name, vin, notes
   trailerType?: 'SEMIREMORCA' | 'REMORCA'      // trailers only
   attachedTrailerId?: uuid                       // trucks only, unique

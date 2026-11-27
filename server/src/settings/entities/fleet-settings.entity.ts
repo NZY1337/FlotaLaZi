@@ -1,5 +1,6 @@
 import { Column, Entity, PrimaryColumn, UpdateDateColumn } from 'typeorm';
 import { numericTransformer } from '../../fleet/transformers';
+import { VehicleKind } from '../../vehicles/entities/vehicle.entity';
 
 export const DEFAULT_EUR_RATE = 4.97;
 
@@ -8,6 +9,14 @@ export enum AccountType {
     FIRM = 'FIRM',
     PERSONAL = 'PERSONAL',
 }
+
+/**
+ * Which vehicles an account may keep: a firm trucks and trailers (the price
+ * counts trucks, so cars would be a free way around it), a person only cars.
+ * Not chosen yet (null) behaves as a firm.
+ */
+export const vehicleKindsFor = (accountType: AccountType | null | undefined): VehicleKind[] =>
+    accountType === AccountType.PERSONAL ? [VehicleKind.CAR] : [VehicleKind.TRUCK, VehicleKind.TRAILER];
 
 /** How a document of the account itself (no vehicle, no driver) is named. */
 export const ownDocumentsLabel = (accountType: AccountType | null | undefined) =>
