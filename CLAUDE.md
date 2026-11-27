@@ -209,7 +209,9 @@ Form inputs (`components/fleet/ui.tsx`) — use these, never a native
   a native number input reads "1.500" as 1.5), parsed by `parseNumberInput`.
 - `DateField`: dates shown and typed as zz.ll.aaaa whatever the browser's
   language (a native date input shows mm/dd/yyyy on an English browser),
-  with a calendar button that opens the browser's own picker; value stays
+  with a calendar icon that is the browser's own date input, invisible and
+  laid over the icon (phones and tablets open a picker only for a real tap on
+  a real input; desktops get `showPicker()` on click); value stays
   `YYYY-MM-DD`, limited to 2000–2099 like the server; `max` (today, for oil
   changes and transactions) refuses later days.
 - `SelectField`, `TextField` for the rest; document types offered in the
