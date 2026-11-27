@@ -100,3 +100,19 @@ describe("TextField", () => {
         expect(screen.getByLabelText("Km")).not.toHaveAttribute("max");
     });
 });
+
+describe("+1 lună / +6 luni / +1 an", () => {
+    it("adds to the date already in the field, clamping the day", async () => {
+        const { plusMonthsInput } = await import("../../helpers/fleet");
+        expect(plusMonthsInput(1, "2027-01-22")).toBe("2027-02-22");
+        expect(plusMonthsInput(12, "2027-01-22")).toBe("2028-01-22");
+        expect(plusMonthsInput(6, "2026-08-31")).toBe("2027-02-28");
+        expect(plusMonthsInput(1, "2028-01-31")).toBe("2028-02-29");
+    });
+
+    it("starts from today when the field is empty", async () => {
+        const { plusMonthsInput, todayInput } = await import("../../helpers/fleet");
+        const [y, m] = todayInput().split("-").map(Number);
+        expect(plusMonthsInput(12, "").startsWith(`${y + 1}-${String(m).padStart(2, "0")}`)).toBe(true);
+    });
+});

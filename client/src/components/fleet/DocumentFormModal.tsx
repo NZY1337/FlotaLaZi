@@ -102,7 +102,7 @@ export default function DocumentFormModal({ isOpen, onClose, document, subject }
             {typeChoice === CUSTOM && <TextField label="Numele actului" value={customType} onChange={setCustomType} required placeholder="ex: Asigurare CMR" />}
             <div>
                 <DateField label="Data expirării" value={expiresOn} onChange={setExpiresOn} required />
-                <DateShortcuts onPick={(m) => setExpiresOn(plusMonthsInput(m))} />
+                <DateShortcuts onPick={(m) => setExpiresOn(plusMonthsInput(m, expiresOn))} />
             </div>
             <TextField label="Anunță-mă cu câte zile înainte" type="number" min={1} max={365} value={alertDays} onChange={setAlertDays} required />
             <TextField label="Observații" value={notes} onChange={setNotes} placeholder="ex: poliță Allianz, valabilă 1 an" />

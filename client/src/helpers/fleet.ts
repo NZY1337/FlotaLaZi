@@ -64,10 +64,17 @@ export const toYmd = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-$
 /** Default value for date inputs (the backend owns "today" for statuses). */
 export const todayInput = () => toYmd(new Date());
 
-export const plusMonthsInput = (months: number) => {
-    const d = new Date();
-    d.setMonth(d.getMonth() + months);
-    return toYmd(d);
+/**
+ * The +1 lună / +6 luni / +1 an shortcuts: months added to the date already in
+ * the field (renewing: the old expiry + 1 year), or to today when it's empty.
+ * The day is clamped, never spilled over: 31.01 + 1 month = 28/29.02.
+ */
+export const plusMonthsInput = (months: number, from = '') => {
+    const base = /^\d{4}-\d{2}-\d{2}$/.test(from) ? from : todayInput();
+    const [y, m, d] = base.split('-').map(Number);
+    const target = new Date(Date.UTC(y, m - 1 + months, 1));
+    const lastDay = new Date(Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0)).getUTCDate();
+    return `${target.getUTCFullYear()}-${pad(target.getUTCMonth() + 1)}-${pad(Math.min(d, lastDay))}`;
 };
 
 export const daysLeftLabel = (daysLeft: number) => {
