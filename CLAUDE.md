@@ -169,7 +169,9 @@ Landing details:
   mention the free plan in words — keep them in step.
 - SEO: title, description, canonical and Open Graph tags are in
   `client/index.html` itself (crawlers and WhatsApp/Facebook previews don't
-  run JS); `public/og-image.png` (1200×630) is the link preview,
+  run JS); `public/og-image.png` (1200×630) is the link preview, the
+  favicon is the logo's blue "F" (`favicon.ico`, `favicon.png` 48px,
+  `favicon-192.png` for Google results, `apple-touch-icon.png`),
   `public/robots.txt` keeps the logged-in pages out, `public/sitemap.xml`
   lists `/`, `/masina` and `/signup` (submitted in Google Search Console —
   the `flotalazi.ro` Domain property, verified by a TXT record at Netim).
