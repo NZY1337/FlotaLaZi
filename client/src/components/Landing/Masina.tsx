@@ -21,6 +21,7 @@ const faqs = [
     { q: 'Chiar e gratuit?', a: 'Da. O mașină e gratuită pentru totdeauna. Dacă ai mai multe, fiecare mașină în plus va costa 25 de lei pe an, de la lansare. Acum, în perioada de testare, totul e gratuit.' },
     { q: 'Trebuie să instalez ceva?', a: 'Nu. Alertele vin pe email, iar aplicația merge din browser. Dacă vrei, o poți pune pe ecranul telefonului ca pe o aplicație.' },
     { q: 'E aceeași aplicație ca pentru firmele de transport?', a: 'Da, dar când îți faci contul de aici, vezi doar ce îți trebuie: mașinile tale, actele lor, actele tale și schimbul de ulei. Fără camioane, șoferi sau contabilitate.' },
+    { q: 'Am o întrebare. Cui scriu?', a: 'Scrie-ne la contact@flotalazi.ro. Îți răspundem cât mai repede.' },
     { q: 'Ce fac cu datele mele?', a: 'Le folosim doar ca să-ți trimitem alertele. Nu le vindem și nu le dăm nimănui.' },
 ];
 

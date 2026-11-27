@@ -11,6 +11,9 @@ const RESEND_ENDPOINT = 'https://api.resend.com/emails';
 // delivers to the Resend account owner's own address. Set MAIL_FROM to an
 // address on your verified domain (e.g. "FlotaLaZi <alerte@flotalazi.ro>").
 const RESEND_TEST_FROM = 'FlotaLaZi <onboarding@resend.dev>';
+// The sending addresses only forward (Netim); replies go straight to the inbox
+// the site advertises, so a customer answering an alert reaches the owner.
+const REPLY_TO = 'FlotaLaZi <contact@flotalazi.ro>';
 
 /**
  * Sends email through one of two transports, picked from the environment:
@@ -33,13 +36,13 @@ export class NodemailerService {
     private async send(mail: Mail): Promise<void> {
         const apiKey = process.env.RESEND_API_KEY;
         if (!apiKey) {
-            await this.smtp.sendMail({ from: process.env.GMAIL_USERNAME, ...mail });
+            await this.smtp.sendMail({ from: process.env.GMAIL_USERNAME, replyTo: REPLY_TO, ...mail });
             return;
         }
         const response = await fetch(RESEND_ENDPOINT, {
             method: 'POST',
             headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ from: process.env.MAIL_FROM || RESEND_TEST_FROM, ...mail }),
+            body: JSON.stringify({ from: process.env.MAIL_FROM || RESEND_TEST_FROM, reply_to: REPLY_TO, ...mail }),
             signal: AbortSignal.timeout(15_000),
         });
         if (!response.ok) {
