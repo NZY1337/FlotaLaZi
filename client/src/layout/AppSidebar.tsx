@@ -10,6 +10,7 @@ import {
 import { useSidebar } from "../context/SidebarContext";
 import { useCurrentUser } from "../hooks/useCurrentUser";
 import { useAccountType } from "../hooks/useSettings";
+import LogoMark from "../components/common/LogoMark";
 
 type NavItem = {
     name: string;
@@ -244,11 +245,7 @@ const AppSidebar: React.FC = () => {
                             <div className="flex flex-col items-center max-w-xs">
                                 <Link to="/" className="block mb-4">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-10 h-10 bg-brand-500 flex items-center justify-center">
-                                            <span className="text-white font-black text-2xl">
-                                                F
-                                            </span>
-                                        </div>
+                                        <LogoMark className="w-10 h-10" />
                                         <span className="font-black text-2xl tracking-tight text-black dark:text-white">
                                             FlotaLaZi
                                         </span>
@@ -259,11 +256,7 @@ const AppSidebar: React.FC = () => {
                     ) : (
                         <div className="flex flex-col items-center max-w-xs">
                             <Link to="/" className="block mb-4">
-                                <div className="w-10 h-10 bg-brand-500 flex items-center justify-center">
-                                    <span className="text-white font-black text-2xl">
-                                        F
-                                    </span>
-                                </div>
+                                <LogoMark className="w-10 h-10" />
                             </Link>
                         </div>
                     )}

@@ -1,6 +1,7 @@
 import PageMeta from '../common/PageMeta';
 import Navbar from './Navbar';
 import Hero from './Hero';
+import ReadyToDrive from './ReadyToDrive';
 import DocumentStrip from './DocumentStrip';
 import Core from './Core';
 import Features from './Features';
@@ -18,6 +19,7 @@ export default function Landing() {
             <PageMeta title="FlotaLaZi — acte, revizii și profit pentru flota ta" description="Alerte pentru ITP, RCA, rovinietă, tahograf și actele șoferilor. Pentru firme de transport din România." />
             <Navbar />
             <Hero />
+            <ReadyToDrive />
             <DocumentStrip />
             <Core />
             <Features />

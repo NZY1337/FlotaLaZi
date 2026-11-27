@@ -5,6 +5,7 @@ import { useSidebar } from "../context/SidebarContext";
 import { ThemeToggleButton } from "../components/common/ThemeToggleButton";
 import NotificationDropdown from "../components/header/NotificationDropdown";
 import UserDropdown from "../components/header/UserDropdown";
+import LogoMark from "../components/common/LogoMark";
 
 const AppHeader: React.FC = () => {
     const [isApplicationMenuOpen, setApplicationMenuOpen] = useState(false);
@@ -85,11 +86,7 @@ const AppHeader: React.FC = () => {
 
                     <Link to="/" className="lg:hidden">
                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-brand-500 flex items-center justify-center">
-                                <span className="text-white font-black text-2xl">
-                                    F
-                                </span>
-                            </div>
+                            <LogoMark className="w-10 h-10" />
                             <span className="font-black text-2xl tracking-tight text-black dark:text-white">
                                 FlotaLaZi
                             </span>
