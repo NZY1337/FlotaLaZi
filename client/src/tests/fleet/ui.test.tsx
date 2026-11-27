@@ -35,6 +35,18 @@ describe("DateField", () => {
         return <form><DateField label="Data" value={value} onChange={(v) => { setValue(v); spy(v); }} required max={max} /></form>;
     }
 
+    it("opens the calendar from a real date input over the icon (a tap on phones), and takes its date", () => {
+        const spy = vi.fn();
+        render(<Harness spy={spy} max="2026-11-27" />);
+        const picker = screen.getByLabelText("Alege data din calendar") as HTMLInputElement;
+        expect(picker.type).toBe("date");
+        expect(picker.max).toBe("2026-11-27");
+
+        fireEvent.change(picker, { target: { value: "2026-11-20" } });
+        expect(spy).toHaveBeenLastCalledWith("2026-11-20");
+        expect(screen.getByLabelText("Data *")).toHaveValue("20.11.2026");
+    });
+
     it("refuses a day after max (things that already happened)", () => {
         render(<Harness spy={vi.fn()} max="2026-11-27" />);
         const input = screen.getByLabelText("Data *") as HTMLInputElement;

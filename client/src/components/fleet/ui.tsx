@@ -200,10 +200,10 @@ export function DateField({ label, value, onChange, required, hint, max }: {
         setText(next);
         onChange(parseDateInput(next) ?? '');
     };
+    // Desktop browsers open the calendar only from their own icon, so a click
+    // asks for it; a phone or tablet opens it by itself on the tap.
     const openPicker = () => {
-        const picker = pickerRef.current;
-        if (!picker) return;
-        try { picker.showPicker(); } catch { picker.focus(); picker.click(); }
+        try { pickerRef.current?.showPicker(); } catch { /* not supported: the tap opens it */ }
     };
 
     return (
@@ -226,21 +226,24 @@ export function DateField({ label, value, onChange, required, hint, max }: {
                     onBlur={() => setTouched(true)}
                     className={`${inputClasses} pr-12`}
                 />
-                <button type="button" onClick={openPicker} aria-label="Alege data din calendar"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5">
-                    <CalendarDays className="h-4 w-4" />
-                </button>
-                <input
-                    ref={pickerRef}
-                    type="date"
-                    tabIndex={-1}
-                    aria-hidden
-                    min={DATE_MIN}
-                    max={max ?? DATE_MAX}
-                    value={value}
-                    onChange={(e) => { setText(formatDateInput(e.target.value)); onChange(e.target.value); }}
-                    className="pointer-events-none absolute bottom-0 right-0 h-0 w-0 opacity-0"
-                />
+                {/* The calendar icon is the browser's own date input, invisible and laid
+                    over the icon: phones and tablets (iOS above all) open their picker
+                    only for a real tap on a real input, never for a hidden one. */}
+                <div className="absolute right-2 top-1/2 h-8 w-8 -translate-y-1/2 overflow-hidden rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5">
+                    <CalendarDays className="pointer-events-none absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2" />
+                    <input
+                        ref={pickerRef}
+                        type="date"
+                        tabIndex={-1}
+                        aria-label="Alege data din calendar"
+                        min={DATE_MIN}
+                        max={max ?? DATE_MAX}
+                        value={value}
+                        onClick={openPicker}
+                        onChange={(e) => { setText(formatDateInput(e.target.value)); onChange(e.target.value); }}
+                        className="absolute inset-0 h-full w-full min-w-0 cursor-pointer appearance-none text-base opacity-0"
+                    />
+                </div>
             </div>
             {problem && (touched || text.length >= 10) && <p className="mt-1 text-xs text-error-500">{problem}</p>}
             {hint && <p className="mt-1 text-xs text-gray-500">{hint}</p>}
