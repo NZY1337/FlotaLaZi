@@ -27,6 +27,15 @@ describe("Landing page", () => {
         expect(screen.getAllByRole("img").every((img) => img.getAttribute("alt"))).toBe(true);
     });
 
+    it("drives a truck past the ITP, RCA and Rovinietă signs under the hero", () => {
+        vi.mocked(useAppContext).mockReturnValue(buildAppContextValue({ session: null }));
+        renderLanding();
+
+        const road = screen.getByRole("region", { name: "Gata de drum" });
+        expect(within(road).getByRole("heading", { level: 2 })).toHaveTextContent("Pleci la drum fără griji.");
+        expect(within(road).getByText(/Toate actele la zi/)).toBeInTheDocument();
+    });
+
     it("tells visitors how to reach us", () => {
         vi.mocked(useAppContext).mockReturnValue(buildAppContextValue({ session: null }));
         renderLanding();

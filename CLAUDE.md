@@ -159,6 +159,11 @@ Landing details:
   use framer-motion and always respect `useReducedMotion()` (reduced motion =
   the final, still picture). Scroll-in animations use `whileInView` with
   `viewport={{ once: true }}` (see `Core.tsx`).
+- `ReadyToDrive.tsx`, right under the hero: "Pleci la drum fără griji." — a
+  truck (SVG, drawn in code) crosses a road as you scroll (`useScroll` on the
+  road scene, so scrolling back backs it up) and the ITP / RCA / Rovinietă
+  signs turn green as it passes; the truck rides a track as wide as the road
+  minus itself, so it ends flush right on any screen.
 - `PromoBanner.tsx`: a moving yellow strip (`#FFD60A`, black text — it must
   stand out from the site's blue) at the top of the fixed `Navbar`
   announcing `/masina` (hidden on `/masina`; closing it is remembered in
