@@ -42,7 +42,9 @@ account** (`FleetSettings.accountType = PERSONAL`) sees a simplified app:
 "Mașinile mele" (vehicles of kind `CAR`), Acte with car and ID-paper types,
 Setări; no Șoferi, no Financiar, no money on the dashboard. A new account
 picks firm or personal on its first, empty dashboard (`/signup?tip=personal`
-from `/masina` picks personal without asking); it can switch in Setări.
+from `/masina` picks personal without asking); Setări offers the switch only
+while the account has no vehicles or drivers (a wrong pick right after
+sign-up), and afterwards just shows the type.
 Vehicle kinds are tied to the account type on the server
 (`vehicleKindsFor`): a firm keeps trucks and trailers only, a person cars
 only — otherwise a firm could keep a fleet of cars free beside its paid

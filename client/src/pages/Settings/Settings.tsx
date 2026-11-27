@@ -3,6 +3,7 @@ import PageMeta from '../../components/common/PageMeta';
 import Alert from '../../components/ui/alert/Alert';
 import { ActionButton, Card, ErrorText, NumberField, PageHeader, SelectField, TextField } from '../../components/fleet/ui';
 import { useLegacyImport, useSettings } from '../../hooks/useSettings';
+import { useDashboard } from '../../hooks/useDashboard';
 import type { AccountType } from '../../services/settings';
 import TestRemindersCard from '../../components/fleet/TestRemindersCard';
 import type { ImportResult } from '../../services/legacyImport';
@@ -12,6 +13,12 @@ import { CONTACT_EMAIL } from '../../helpers/constants';
 export default function Settings() {
     const { settings, isError, update } = useSettings();
     const personal = settings?.accountType === 'PERSONAL';
+    // The type is picked once. It can still be changed while the account holds
+    // no vehicles or drivers (a wrong pick right after sign-up); after that it
+    // is only shown — the server refuses a switch that would hide data.
+    const { dashboard } = useDashboard();
+    const counts = dashboard?.counts;
+    const canSwitchType = !!counts && counts.trucks + counts.trailers + counts.cars + counts.drivers === 0;
     const importBackup = useLegacyImport();
     const [form, setForm] = useState({ eurRate: '', oilAlertKm: '', docAlertDays: '', emailAlerts: true });
     const [saved, setSaved] = useState(false);
@@ -58,17 +65,22 @@ export default function Settings() {
     return (
         <>
             <PageMeta title="Setări - FlotaLaZi" description="Curs valutar, alerte și import date." />
-            <PageHeader title="Setări" subtitle={personal ? 'Alerte și tipul contului.' : 'Curs valutar, alerte și importul datelor din aplicația veche.'} />
+            <PageHeader title="Setări" subtitle={personal ? 'Alertele tale.' : 'Curs valutar, alerte și importul datelor din aplicația veche.'} />
 
             {isError && <Alert variant="error" title="Eroare" message="Nu am putut încărca setările." />}
 
             <div className="grid gap-4 lg:grid-cols-2">
                 <Card title="⚙️ Setări generale">
                     <form className="flex flex-col gap-4" onSubmit={(e) => { e.preventDefault(); save(); }}>
-                        {settings && (
+                        {settings && canSwitchType && (
                             <SelectField label="Folosesc FlotaLaZi pentru" value={settings.accountType ?? 'FIRM'}
                                 onChange={(v) => update.mutate({ accountType: v as AccountType })}
                                 options={[{ value: 'FIRM', label: '🚛 Firma mea de transport' }, { value: 'PERSONAL', label: '🚗 Mașina mea (persoană fizică)' }]} />
+                        )}
+                        {settings && counts && !canSwitchType && (
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
+                                Tip cont: <strong>{personal ? '🚗 Mașina mea (persoană fizică)' : '🚛 Firmă de transport'}</strong>
+                            </p>
                         )}
                         {!personal && <TextField label="Curs valutar (1 EUR = ? RON)" type="number" step="0.0001" min={0.0001} max={20} value={form.eurRate} required
                             onChange={(v) => setForm((f) => ({ ...f, eurRate: v }))}
