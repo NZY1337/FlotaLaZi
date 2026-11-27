@@ -10,8 +10,20 @@ describe('reminder digest', () => {
     });
 
     it('words oil alerts', () => {
-        expect(alertLine({ kind: 'oil', plate: 'NT 08 RGT', kmLeft: 1200, daysLeft: null })).toBe('Schimb ulei — NT 08 RGT: mai sunt 1200 km');
+        expect(alertLine({ kind: 'oil', plate: 'NT 08 RGT', kmLeft: 1200, daysLeft: null })).toBe('Schimb ulei — NT 08 RGT: mai sunt 1.200 km');
         expect(alertLine({ kind: 'oil', plate: 'NT 08 RGT', kmLeft: -300, daysLeft: -2 })).toBe('Schimb ulei — NT 08 RGT: depășit cu 300 km, termen depășit cu 2 zile');
+        expect(alertLine({ kind: 'oil', plate: 'NT 08 RGT', kmLeft: -12500, daysLeft: null })).toBe('Schimb ulei — NT 08 RGT: depășit cu 12.500 km');
+    });
+
+    it('puts what is overdue first, the rest in brackets', () => {
+        expect(alertLine({ kind: 'oil', plate: 'NT-99-NZY', kmLeft: 5000, daysLeft: -16 })).toBe('Schimb ulei — NT-99-NZY: termen depășit cu 16 zile (mai sunt 5.000 km)');
+        expect(alertLine({ kind: 'oil', plate: 'NT-99-NZY', kmLeft: -200, daysLeft: 10 })).toBe('Schimb ulei — NT-99-NZY: depășit cu 200 km (termen în 10 zile)');
+    });
+
+    it('says "1 zi", not "1 zile"', () => {
+        expect(alertLine({ kind: 'oil', plate: 'X', kmLeft: null, daysLeft: -1 })).toBe('Schimb ulei — X: termen depășit cu 1 zi');
+        expect(alertLine({ kind: 'oil', plate: 'X', kmLeft: null, daysLeft: 1 })).toBe('Schimb ulei — X: termen în 1 zi');
+        expect(alertLine({ kind: 'oil', plate: 'X', kmLeft: null, daysLeft: 0 })).toBe('Schimb ulei — X: termen azi');
     });
 
     it('marks overdue items as errors', () => {
