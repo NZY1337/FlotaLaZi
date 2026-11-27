@@ -1,11 +1,12 @@
 import { Link } from 'react-router';
 import Logo from './Logo';
+import { CONTACT_EMAIL } from '../../helpers/constants';
 
 export default function Footer() {
     return (
         <footer className="py-20 bg-white border-t-2 border-black">
             <div className="max-w-7xl mx-auto px-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-16 mb-20">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-20">
                     <div>
                         <div className="mb-6"><Logo /></div>
                         <p className="text-sm font-bold text-gray-400 leading-relaxed">
@@ -27,6 +28,13 @@ export default function Footer() {
                         <ul className="space-y-3 text-sm font-bold text-gray-400">
                             <li><Link to="/signup" className="hover:text-black transition-colors">Creează cont</Link></li>
                             <li><Link to="/signin" className="hover:text-black transition-colors">Intră în cont</Link></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 className="font-bold uppercase tracking-tight mb-6">Contact</h4>
+                        <ul className="space-y-3 text-sm font-bold text-gray-400">
+                            <li><a href={`mailto:${CONTACT_EMAIL}`} className="hover:text-black transition-colors break-all">{CONTACT_EMAIL}</a></li>
+                            <li className="font-medium">Îți răspundem cât mai repede.</li>
                         </ul>
                     </div>
                 </div>

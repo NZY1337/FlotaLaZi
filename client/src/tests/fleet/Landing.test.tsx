@@ -27,6 +27,14 @@ describe("Landing page", () => {
         expect(screen.getAllByRole("img").every((img) => img.getAttribute("alt"))).toBe(true);
     });
 
+    it("tells visitors how to reach us", () => {
+        vi.mocked(useAppContext).mockReturnValue(buildAppContextValue({ session: null }));
+        renderLanding();
+
+        const footer = screen.getByRole("contentinfo");
+        expect(within(footer).getByRole("link", { name: "contact@flotalazi.ro" })).toHaveAttribute("href", "mailto:contact@flotalazi.ro");
+    });
+
     it("offers the dashboard to a signed-in user", () => {
         vi.mocked(useAppContext).mockReturnValue(buildAppContextValue({ session: { access_token: "t" } as Session }));
         renderLanding();

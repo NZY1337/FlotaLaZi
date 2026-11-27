@@ -8,6 +8,7 @@ const faqs = [
     { q: 'Pot urmări și actele șoferilor?', a: 'Da: permis, atestat profesional, card tahograf, avize medicale și psihologice — fiecare cu alertă proprie.' },
     { q: 'Am folosit aplicația „Flota Mea”. Pierd datele?', a: 'Nu. Faci backup din aplicația veche și îl încarci în Setări. Camioanele, actele și tranzacțiile se mută automat.' },
     { q: 'Remorcile se plătesc?', a: 'Nu. Plătești doar după numărul de camioane. Remorcile, șoferii și actele sunt nelimitate în orice plan.' },
+    { q: 'Am o întrebare. Cu cine vorbesc?', a: 'Scrie-ne la contact@flotalazi.ro. Îți răspundem cât mai repede și te putem ajuta să-ți pui actele în aplicație.' },
     { q: 'Pot anula oricând?', a: 'Da, fără perioadă minimă și fără contract. Un camion rămâne gratuit pentru totdeauna.' },
 ];
 

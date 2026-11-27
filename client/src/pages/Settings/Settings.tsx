@@ -7,6 +7,7 @@ import type { AccountType } from '../../services/settings';
 import TestRemindersCard from '../../components/fleet/TestRemindersCard';
 import type { ImportResult } from '../../services/legacyImport';
 import { parseNumberInput } from '../../helpers/fleet';
+import { CONTACT_EMAIL } from '../../helpers/constants';
 
 export default function Settings() {
     const { settings, isError, update } = useSettings();
@@ -113,6 +114,14 @@ export default function Settings() {
                         )}
                     </div>
                 </Card>}
+
+                <Card title="💬 Ajutor">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                        Ai o întrebare sau ceva nu merge? Scrie-ne la{' '}
+                        <a href={`mailto:${CONTACT_EMAIL}`} className="font-medium text-brand-500 hover:underline">{CONTACT_EMAIL}</a>
+                        {' '}— îți răspundem cât mai repede.
+                    </p>
+                </Card>
             </div>
         </>
     );

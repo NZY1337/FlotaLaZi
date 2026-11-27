@@ -85,7 +85,13 @@ External systems:
   (`server/services/nodemailer/`): Resend's HTTPS API when `RESEND_API_KEY`
   is set (production — Railway blocks outbound SMTP below the Pro plan),
   otherwise Gmail SMTP (local dev). The welcome email is sent in the
-  background, once per user; a mail failure never fails a request.
+  background, once per user; a mail failure never fails a request. Every
+  email has `Reply-To: contact@flotalazi.ro`.
+- **Contact**: `contact@`, `alerte@` and `cont@flotalazi.ro` are forwarding
+  addresses at Netim (free, MX = mx1/mx2.netim.net) to the owner's Gmail;
+  nothing on our side receives mail. The site shows `contact@` in the footer
+  and FAQ (`CONTACT_EMAIL` in `client/src/helpers/constants.tsx`), the app in
+  Setări → Ajutor.
 - **Account emails** (confirm sign-up, reset password, change email) are
   sent by **Supabase Auth itself**, through Resend's SMTP (custom SMTP set
   up with Resend's Supabase integration, sender `FlotaLaZi
