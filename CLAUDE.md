@@ -402,8 +402,12 @@ Don't advertise a feature on the landing before it exists — mark it
   `npm run migration:run`. Every migration that creates a table must
   `ENABLE ROW LEVEL SECURITY` on it (Supabase exposes `public` through its
   Data API; no policies needed — the backend bypasses RLS).
-- `DATABASE_URL`: local Postgres in dev; Supabase session pooler / direct
-  connection (port 5432) in production — never the 6543 transaction pooler.
+- `DATABASE_URL`: local Postgres in dev (`flotalazi_dev`, plus
+  `flotalazi_test` for the API tests — setup in `server/DEV-LOCAL.md`);
+  `server/.env` never holds the production URL, which lives only in Railway
+  (a dev server on production data would also run the 08:00 cron). Supabase
+  session pooler / direct connection (port 5432) in production — never the
+  6543 transaction pooler.
   The session pooler allows 15 clients per project, shared by every server
   using it, so each server's pool is capped at 5 (`DB_POOL_MAX` overrides).
 - FlotaLaZi needs its **own** Supabase project — never point it at
@@ -424,8 +428,9 @@ Don't advertise a feature on the landing before it exists — mark it
   `npm run start:prod` = `node dist/src/main` — the build nests output under
   `dist/src/` because `services/` lives outside `src/`). Never a host that
   sleeps: the 08:00 reminder cron must run. Migrations are run by hand
-  (`npm run migration:run` with the production `DATABASE_URL`) before
-  deploying a schema change.
+  (`DATABASE_URL='<from Railway>' npm run migration:run`) before merging a
+  schema change, so keep them additive (nullable / default columns, new
+  tables) — the old code keeps running until Railway redeploys.
 - Domain and accounts: `flotalazi.ro` is registered at Netim (DNS there:
   Vercel, Resend's records, the Google Search Console TXT; apex redirects to
   `www`). Plans: Railway needs Hobby ($5/month) — its free tier sleeps and

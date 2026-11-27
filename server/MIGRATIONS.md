@@ -62,7 +62,8 @@ test, un stil.
 
 **1. Citește mereu SQL-ul din `up()`, înainte de `migration:run`.**
 Caută cuvântul **`DROP`**: `DROP COLUMN` sau `DROP TABLE` înseamnă că se pierd
-date. Ai o singură bază (Supabase) și e cea reală, nu există „doar de test".
+date. Rulezi întâi pe baza locală (vezi `DEV-LOCAL.md`); pe producție nu există
+„doar de test".
 
 **2. Redenumire + altceva = date pierdute.**
 - Doar redenumești un câmp → TypeORM scrie `RENAME COLUMN`. E sigur.
@@ -99,10 +100,10 @@ Nu le șterge nici: fără ele nu poți reface baza pe alt proiect Supabase.
 **7. Dacă uiți `migration:run`,** aplicația pornește, dar dă erori la prima
 interogare, de genul `column "..." does not exist`.
 
-**8. `DATABASE_URL` din `server/.env`** trebuie să fie *Session pooler*
-(port **5432**), nu cel de pe 6543, care strică migrațiile. În URL, parola
-înlocuiește `[YOUR-PASSWORD]` **cu tot cu parantezele**. Fișierul `.env` nu
-intră în git.
+**8. `DATABASE_URL` din `server/.env` e baza locală.** Pe producție rulezi
+migrația dând URL-ul din Railway direct în comandă (vezi `DEV-LOCAL.md`). Acel
+URL e *Session pooler* (port **5432**), nu cel de pe 6543, care strică
+migrațiile. Fișierul `.env` nu intră în git.
 
 ## Cum desfaci o migrație
 
@@ -123,7 +124,7 @@ sigur să scrii una nouă care o corectează decât s-o desfaci.
 | Configurarea pentru comenzile `migration:*` | `src/data-source.ts` |
 | `synchronize: false` | `src/app.module.ts` |
 | Ce a rulat deja | tabelul `migrations` din baza de date |
-| Conexiunea la bază | `DATABASE_URL` în `server/.env` |
+| Conexiunea la bază | `DATABASE_URL` în `server/.env` (locală); producția: Railway → Variables |
 
 Cele două migrații existente:
 - `Baseline` — generat automat (users, notifications, services), plus o linie
