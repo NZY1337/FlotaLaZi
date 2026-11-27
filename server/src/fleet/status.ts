@@ -62,6 +62,15 @@ export function oilStatus(v: OilInput, oilAlertKm: number, today: string): OilSt
 }
 
 /** While a document stays expired, it is reminded again this often. */
+/**
+ * The odometer can't be behind the last oil change: a last change at more km
+ * than the truck has is a typo. Returns the problem in Romanian, or null.
+ */
+export function odometerProblem(km: number | null | undefined, lastOilKm: number | null | undefined): string | null {
+    if (km == null || lastOilKm == null || lastOilKm <= km) return null;
+    return `Ultimul schimb de ulei (${lastOilKm} km) nu poate fi la mai mulți km decât kilometrajul actual (${km} km).`;
+}
+
 export const EXPIRED_REMINDER_EVERY_DAYS = 7;
 
 /**

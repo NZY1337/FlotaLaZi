@@ -86,7 +86,7 @@ export default function TransactionFormModal({ isOpen, onClose, type = 'EXPENSE'
             </Row>
             <Row>
                 <SelectField label="Categorie" value={category} onChange={setCategory} options={categoryOptions} required />
-                <DateField label="Data" value={date} onChange={setDate} required />
+                <DateField label="Data" value={date} onChange={setDate} required max={todayInput()} />
             </Row>
             <SelectField label="Camion / remorcă" value={vehicleId} onChange={setVehicleId}
                 options={[{ value: '', label: '🏢 General / firmă' }, ...vehicles.map((v) => ({ value: v.id, label: `${v.kind === 'TRUCK' ? '🚛' : '🚚'} ${v.plate}` }))]} />

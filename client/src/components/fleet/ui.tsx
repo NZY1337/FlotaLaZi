@@ -168,12 +168,14 @@ export function TextField({ label, value, onChange, type = 'text', required, pla
  * form is blocked with the browser's own message while the date is unclear.
  * The calendar button opens the browser's own date picker.
  */
-export function DateField({ label, value, onChange, required, hint }: {
+export function DateField({ label, value, onChange, required, hint, max }: {
     label: string;
     value: string;
     onChange: (value: string) => void;
     required?: boolean;
     hint?: string;
+    /** Latest allowed day, `YYYY-MM-DD` (e.g. today for things that already happened). The server checks it too. */
+    max?: string;
 }) {
     const id = useId();
     const ref = useRef<HTMLInputElement>(null);
@@ -186,7 +188,11 @@ export function DateField({ label, value, onChange, required, hint }: {
     }, [value]);
 
     const filled = text.trim() !== '';
-    const problem = filled && parseDateInput(text) === null ? 'Data nu e bună. Scrie zi.lună.an, de exemplu 26.11.2026.' : '';
+    const parsed = parseDateInput(text);
+    const problem = !filled ? ''
+        : parsed === null ? 'Data nu e bună. Scrie zi.lună.an, de exemplu 26.11.2026.'
+        : max && parsed > max ? 'Data nu poate fi în viitor.'
+        : '';
     useEffect(() => { ref.current?.setCustomValidity(problem); }, [problem]);
 
     const type = (raw: string) => {
@@ -230,7 +236,7 @@ export function DateField({ label, value, onChange, required, hint }: {
                     tabIndex={-1}
                     aria-hidden
                     min={DATE_MIN}
-                    max={DATE_MAX}
+                    max={max ?? DATE_MAX}
                     value={value}
                     onChange={(e) => { setText(formatDateInput(e.target.value)); onChange(e.target.value); }}
                     className="pointer-events-none absolute bottom-0 right-0 h-0 w-0 opacity-0"

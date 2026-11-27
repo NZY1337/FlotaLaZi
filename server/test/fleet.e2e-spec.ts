@@ -133,9 +133,37 @@ describeDb('FlotaLaZi API (e2e)', () => {
         await as(A).patch('/vehicles/not-a-uuid', { km: 1 }).expect(400);
     });
 
+    it('refuses inputs that cannot be true: future oil changes and expenses, oil changes past the odometer, bad phones and emails', async () => {
+        const G = 'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee';
+        const today = todayYmd();
+        const tomorrow = addDays(today, 1);
+
+        expect((await as(G).post('/vehicles', { kind: 'TRUCK', plate: 'NT 01 AAA', lastOilDate: tomorrow }).expect(400)).body.message)
+            .toEqual(['Data ultimului schimb de ulei nu poate fi în viitor.']);
+        expect((await as(G).post('/vehicles', { kind: 'TRUCK', plate: 'NT 01 AAA', km: 185_000, lastOilKm: 190_000 }).expect(400)).body.message)
+            .toMatch(/190000 km.*185000 km/);
+        const truck = (await as(G).post('/vehicles', { kind: 'TRUCK', plate: 'NT 01 AAA', km: 185_000, lastOilKm: 180_000, lastOilDate: today }).expect(201)).body;
+        // The odometer can't go back below the last oil change (checked on the merged values).
+        await as(G).patch(`/vehicles/${truck.id}`, { km: 170_000 }).expect(400);
+        await as(G).patch(`/vehicles/${truck.id}`, { km: 186_000 }).expect(200);
+
+        await as(G).post(`/vehicles/${truck.id}/oil-change`, { km: 186_000, date: tomorrow }).expect(400);
+        expect((await as(G).post(`/vehicles/${truck.id}/oil-change`, { km: 179_000, date: today }).expect(400)).body.message).toMatch(/180000 km/);
+        await as(G).post(`/vehicles/${truck.id}/oil-change`, { km: 186_000, date: today }).expect(201);
+
+        const tx = { type: 'EXPENSE', amount: 100, currency: 'RON', category: 'Motorină' };
+        expect((await as(G).post('/transactions', { ...tx, date: tomorrow }).expect(400)).body.message).toEqual(['Data tranzacției nu poate fi în viitor.']);
+        await as(G).post('/transactions', { ...tx, date: today }).expect(201);
+
+        await as(G).post('/drivers', { name: 'Ion', phone: 'nu am' }).expect(400);
+        await as(G).post('/drivers', { name: 'Ion', email: 'ion@' }).expect(400);
+        await as(G).post('/drivers', { name: 'Ion', phone: '', email: '' }).expect(201);
+        await as(G).post('/drivers', { name: 'Ion', phone: '+40 745-123.456', email: 'ion@firma.ro' }).expect(201);
+    });
+
     it('lists documents with their status and refuses vehicle + driver together', async () => {
         const today = todayYmd();
-        const driver = await as(A).post('/drivers', { name: 'Ion Popescu', phone: '0722' }).expect(201);
+        const driver = await as(A).post('/drivers', { name: 'Ion Popescu', phone: '0722 123 456' }).expect(201);
         await as(A).post('/documents', { vehicleId: truckId, type: 'ITP', expiresOn: addDays(today, 7) }).expect(201);
         await as(A).post('/documents', { driverId: driver.body.id, type: 'Card tahograf', expiresOn: addDays(today, 200) }).expect(201);
         await as(A).post('/documents', { type: 'Licență Transport', expiresOn: addDays(today, -3), alertDays: 10 }).expect(201);

@@ -210,7 +210,8 @@ Form inputs (`components/fleet/ui.tsx`) — use these, never a native
 - `DateField`: dates shown and typed as zz.ll.aaaa whatever the browser's
   language (a native date input shows mm/dd/yyyy on an English browser),
   with a calendar button that opens the browser's own picker; value stays
-  `YYYY-MM-DD`, limited to 2000–2099 like the server.
+  `YYYY-MM-DD`, limited to 2000–2099 like the server; `max` (today, for oil
+  changes and transactions) refuses later days.
 - `SelectField`, `TextField` for the rest; document types offered in the
   form are `DOCUMENT_TYPES` / `DRIVER_DOCUMENT_TYPES` in `helpers/fleet.ts`
   (the type is free text, so the list is only a convenience).
@@ -369,6 +370,13 @@ for Railway. Rate limit (`@nestjs/throttler`, `throttle.guard.ts`): 300
 requests/minute per session token (IP when there is none), 5/minute on
 `POST /import/legacy`, none on the notifications stream. Malformed ids are a
 400 (`ParseUUIDPipe`), never a 500.
+**Impossible inputs are refused** (400, Romanian message): an oil-change or
+transaction date after today in Romania (`@NotInFuture`, `fleet/is-ymd.validator.ts`),
+a last oil change at more km than the odometer (`odometerProblem` in
+`fleet/status.ts`, checked on the merged values on PATCH), an oil change at
+fewer km than the previous one, a driver phone or email that isn't one
+(empty = none). Document expiry dates may be in the past (expired papers).
+The forms mirror the date rule with `DateField max`.
 **Ownership**: a record of another owner is a 404, never a 403. Ids coming
 from the client (vehicleId, driverId, attachedTrailerId) are verified to
 belong to the same owner before use.

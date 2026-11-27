@@ -18,6 +18,11 @@ export function isYmd(value: unknown): value is string {
     return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
 }
 
+/** A past or present business date: not after `today` (ISO strings compare as dates). */
+export function isNotAfter(ymd: string, today: string): boolean {
+    return ymd <= today;
+}
+
 export function todayYmd(now: Date = new Date()): string {
     // en-CA formats as YYYY-MM-DD.
     return new Intl.DateTimeFormat('en-CA', {
