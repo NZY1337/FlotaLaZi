@@ -13,6 +13,8 @@ Supabase integration). These files are the Romanian text for them. They are
 | Change email address | `change-email.html` | Confirmă noua adresă de email |
 
 `{{ .ConfirmationURL }}`, `{{ .Email }}` and `{{ .NewEmail }}` are filled in by
-Supabase. Keep the HTML simple (no images, inline styles): it reads well in
-every mail client and looks less like spam. If you change a template in
+Supabase. Keep the HTML simple (inline styles, one small image: the logo,
+loaded from `https://www.flotalazi.ro/favicon-192.png`): it reads well in
+every mail client and looks less like spam. A client that blocks images
+still shows the name next to it. If you change a template in
 Supabase, update the file here too.
