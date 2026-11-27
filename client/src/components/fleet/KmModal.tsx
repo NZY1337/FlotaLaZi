@@ -50,7 +50,7 @@ export default function KmModal({ truck, mode, onClose }: Props) {
             <NumberField label="Kilometraj din bord" unit="km" min={0} value={km} onChange={setKm} required />
             {mode === 'oil' && (
                 <>
-                    <DateField label="Data schimbului" value={date} onChange={setDate} required />
+                    <DateField label="Data schimbului" value={date} onChange={setDate} required max={todayInput()} />
                     <Row>
                         <NumberField label="Cost (opțional)" decimals={2} unit={currency === 'EUR' ? '€' : 'lei'} min={0} max={1_000_000} value={cost} onChange={setCost} hint="Se adaugă automat la cheltuieli." />
                         <SelectField label="Monedă" value={currency} onChange={(v) => setCurrency(v as Currency)} options={[{ value: 'RON', label: 'RON' }, { value: 'EUR', label: 'EUR' }]} />

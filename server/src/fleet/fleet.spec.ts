@@ -1,6 +1,6 @@
-import { addDays, addMonths, daysBetween, isYmd, monthRange, todayYmd } from './dates';
+import { addDays, addMonths, daysBetween, isNotAfter, isYmd, monthRange, todayYmd } from './dates';
 import { decimalToMinor, MAX_AMOUNT, MAX_EUR_RATE, toRonMinor } from './money';
-import { expiryStatus, oilStatus, shouldAlertDocument, shouldAlertOil } from './status';
+import { expiryStatus, odometerProblem, oilStatus, shouldAlertDocument, shouldAlertOil } from './status';
 
 describe('dates', () => {
     it('validates real calendar dates only', () => {
@@ -156,5 +156,22 @@ describe('reminder rules', () => {
         expect(shouldAlertOil('yellow', null, today)).toBe(true);
         expect(shouldAlertOil('red', '2026-11-20', today)).toBe(false);
         expect(shouldAlertOil('red', '2026-11-18', today)).toBe(true);
+    });
+});
+
+describe('input sanity', () => {
+    it('a past or present date is not after today; tomorrow is', () => {
+        expect(isNotAfter('2026-11-26', '2026-11-27')).toBe(true);
+        expect(isNotAfter('2026-11-27', '2026-11-27')).toBe(true);
+        expect(isNotAfter('2026-11-28', '2026-11-27')).toBe(false);
+        expect(isNotAfter('2027-01-01', '2026-12-31')).toBe(false);
+    });
+
+    it('the last oil change cannot be at more km than the odometer', () => {
+        expect(odometerProblem(185_000, 180_000)).toBeNull();
+        expect(odometerProblem(185_000, 185_000)).toBeNull();
+        expect(odometerProblem(null, 190_000)).toBeNull();
+        expect(odometerProblem(185_000, undefined)).toBeNull();
+        expect(odometerProblem(185_000, 190_000)).toMatch(/190000 km.*185000 km/);
     });
 });

@@ -3,7 +3,7 @@ import { IsEnum, IsIn, IsNumber, IsOptional, IsString, IsUUID, Length, Max, MaxL
 import { PartialType } from '@nestjs/mapped-types';
 import { TransactionType } from '../entities/transaction.entity';
 import { CURRENCIES, MAX_AMOUNT, type Currency } from '../../fleet/money';
-import { IsYmd } from '../../fleet/is-ymd.validator';
+import { IsYmd, NotInFuture } from '../../fleet/is-ymd.validator';
 
 const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value);
 
@@ -11,7 +11,9 @@ export class CreateTransactionDto {
     @IsEnum(TransactionType)
     type: TransactionType;
 
+    // An income or expense that happened; a future date is a typo.
     @IsYmd()
+    @NotInFuture({ message: 'Data tranzacției nu poate fi în viitor.' })
     date: string;
 
     // Major units (e.g. 1250.50). The backend converts to minor units.

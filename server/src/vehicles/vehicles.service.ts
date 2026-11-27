@@ -7,7 +7,7 @@ import { SettingsService } from '../settings/settings.service';
 import { vehicleKindsFor } from '../settings/entities/fleet-settings.entity';
 import { TransactionsService } from '../transactions/transactions.service';
 import { TransactionType } from '../transactions/entities/transaction.entity';
-import { oilStatus } from '../fleet/status';
+import { odometerProblem, oilStatus } from '../fleet/status';
 import { todayYmd } from '../fleet/dates';
 import { found } from '../fleet/owned';
 
@@ -71,6 +71,8 @@ export class VehiclesService {
                 : 'Un cont personal are doar mașini. Pentru camioane și remorci, alege „Firmă de transport” în Setări.');
         }
         const data = this.clean(kind, rest);
+        const odometer = odometerProblem(data.km, data.lastOilKm);
+        if (odometer) throw new BadRequestException(odometer);
         return this.repo.manager.transaction(async (manager) => {
             if (data.attachedTrailerId) {
                 await this.ensureTrailer(manager, ownerId, data.attachedTrailerId);
@@ -90,6 +92,9 @@ export class VehiclesService {
                 // Coupling to this truck uncouples it from any other one.
                 await manager.update(Vehicle, { ownerId, attachedTrailerId: data.attachedTrailerId }, { attachedTrailerId: null });
             }
+            // Checked on the merged values: the km modal sends km alone.
+            const odometer = odometerProblem(data.km !== undefined ? data.km : vehicle.km, data.lastOilKm !== undefined ? data.lastOilKm : vehicle.lastOilKm);
+            if (odometer) throw new BadRequestException(odometer);
             // Oil data changed by hand → restart reminder bookkeeping.
             if (data.lastOilKm !== undefined || data.lastOilDate !== undefined) vehicle.lastOilAlertOn = null;
             Object.assign(vehicle, data);
@@ -106,6 +111,9 @@ export class VehiclesService {
     async oilChange(ownerId: string, id: string, dto: OilChangeDto) {
         const vehicle = found(await this.repo.findOneBy({ id, ownerId }), 'Vehicle');
         if (!hasEngine(vehicle.kind)) throw new BadRequestException('Trailers have no oil changes');
+        if (vehicle.lastOilKm != null && dto.km < vehicle.lastOilKm) {
+            throw new BadRequestException(`Schimbul de ulei nu poate fi la mai puțini km decât cel anterior (${vehicle.lastOilKm} km). Dacă cel vechi e greșit, corectează-l din „Editează”.`);
+        }
         vehicle.km = Math.max(vehicle.km ?? 0, dto.km);
         vehicle.lastOilKm = dto.km;
         vehicle.lastOilDate = dto.date;

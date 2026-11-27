@@ -30,10 +30,22 @@ describe("Romanian dates", () => {
 });
 
 describe("DateField", () => {
-    function Harness({ initial = "", spy }: { initial?: string; spy: (v: string) => void }) {
+    function Harness({ initial = "", spy, max }: { initial?: string; spy: (v: string) => void; max?: string }) {
         const [value, setValue] = useState(initial);
-        return <form><DateField label="Data" value={value} onChange={(v) => { setValue(v); spy(v); }} required /></form>;
+        return <form><DateField label="Data" value={value} onChange={(v) => { setValue(v); spy(v); }} required max={max} /></form>;
     }
+
+    it("refuses a day after max (things that already happened)", () => {
+        render(<Harness spy={vi.fn()} max="2026-11-27" />);
+        const input = screen.getByLabelText("Data *") as HTMLInputElement;
+
+        fireEvent.change(input, { target: { value: "27.11.2026" } });
+        expect(input.validity.valid).toBe(true);
+
+        fireEvent.change(input, { target: { value: "03.12.2026" } });
+        expect(input.validity.valid).toBe(false);
+        expect(screen.getByText("Data nu poate fi în viitor.")).toBeInTheDocument();
+    });
 
     it("shows the stored date as zz.ll.aaaa and stores what is typed as YYYY-MM-DD", () => {
         const spy = vi.fn();

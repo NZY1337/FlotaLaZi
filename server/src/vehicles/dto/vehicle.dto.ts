@@ -2,7 +2,7 @@ import { Transform } from 'class-transformer';
 import { IsEnum, IsIn, IsInt, IsNumber, IsOptional, IsString, IsUUID, Length, Max, MaxLength, Min, ValidateIf } from 'class-validator';
 import { OmitType, PartialType } from '@nestjs/mapped-types';
 import { TrailerType, VehicleKind } from '../entities/vehicle.entity';
-import { IsYmd } from '../../fleet/is-ymd.validator';
+import { IsYmd, NotInFuture } from '../../fleet/is-ymd.validator';
 import { CURRENCIES, type Currency, MAX_AMOUNT } from '../../fleet/money';
 
 const upperTrim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim().toUpperCase() : value);
@@ -68,6 +68,7 @@ export class CreateVehicleDto {
     @IsOptional()
     @ValidateIf((_, v) => v !== null)
     @IsYmd()
+    @NotInFuture({ message: 'Data ultimului schimb de ulei nu poate fi în viitor.' })
     lastOilDate?: string | null;
 
     @IsOptional()
@@ -88,6 +89,7 @@ export class OilChangeDto {
     km: number;
 
     @IsYmd()
+    @NotInFuture({ message: 'Data schimbului de ulei nu poate fi în viitor.' })
     date: string;
 
     // Optional cost, in major units (e.g. 2500.50); recorded as an expense.
