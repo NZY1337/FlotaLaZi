@@ -152,6 +152,14 @@ style as the old Streamloop homepage; photos hotlinked from Pexels/Unsplash,
 credited in the footer, URLs in `Landing/images.ts`). `ProtectedRoute` sends
 signed-out users to `/signin` — never to `/`.
 
+Logo: the mark is "the road that turns into a check" — a blue rounded
+square, a white check whose long stroke carries a dashed road line —
+`components/common/LogoMark.tsx`, used by the landing (`Landing/Logo.tsx`),
+the hero mockup, the truck in `ReadyToDrive`, the app's sidebar and header
+and the auth pages. The same drawing is baked into the favicons,
+`og-image.png` and the Supabase email templates (they load
+`https://www.flotalazi.ro/favicon-192.png`): change them together.
+
 Landing details:
 
 - The hero's product shot (`HeroMockup.tsx`) is drawn in code, not an image:
@@ -175,8 +183,8 @@ Landing details:
 - SEO: title, description, canonical and Open Graph tags are in
   `client/index.html` itself (crawlers and WhatsApp/Facebook previews don't
   run JS); `public/og-image.png` (1200×630) is the link preview, the
-  favicon is the logo's blue "F" (`favicon.ico`, `favicon.png` 48px,
-  `favicon-192.png` for Google results, `apple-touch-icon.png`),
+  favicons (`favicon.ico`, `favicon.png` 48px, `favicon-192.png` for Google
+  results, `apple-touch-icon.png`) are the logo mark,
   `public/robots.txt` keeps the logged-in pages out, `public/sitemap.xml`
   lists `/`, `/masina` and `/signup` (submitted in Google Search Console —
   the `flotalazi.ro` Domain property, verified by a TXT record at Netim).

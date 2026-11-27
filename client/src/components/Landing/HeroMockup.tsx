@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { animate, motion, useReducedMotion } from 'framer-motion';
 import { BellRing, Mail, TrendingUp } from 'lucide-react';
 import { IMAGES } from './images';
+import LogoMark from '../common/LogoMark';
 
 // Static product shot for the hero: the truck photo behind, the app's dashboard
 // on a phone in front, and the two things the owner gets without opening the
@@ -54,7 +55,7 @@ export default function HeroMockup() {
                 <div className="overflow-hidden rounded-[1.6rem] bg-white">
                     <div className="flex items-center justify-between bg-white px-4 pt-3 pb-2">
                         <div className="flex items-center gap-1.5">
-                            <div className="flex h-5 w-5 items-center justify-center bg-[#465fff] text-[11px] font-black text-white">F</div>
+                            <LogoMark className="h-5 w-5" />
                             <span className="text-sm font-black tracking-tight text-black">FlotaLaZi</span>
                         </div>
                         <div className="relative">

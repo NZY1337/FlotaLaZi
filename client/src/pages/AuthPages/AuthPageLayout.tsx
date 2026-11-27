@@ -2,6 +2,7 @@ import React from "react";
 import GridShape from "../../components/common/GridShape";
 import { Link } from "react-router";
 import ThemeTogglerTwo from "../../components/common/ThemeTogglerTwo";
+import LogoMark from "../../components/common/LogoMark";
 
 export default function AuthLayout({
     children,
@@ -18,9 +19,7 @@ export default function AuthLayout({
                         <div className="flex flex-col items-center max-w-xs">
                             <Link to="/" className="block">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-25 h-25 bg-black flex items-center justify-center">
-                                        <span role="img" aria-label="FlotaLaZi" className="text-6xl">🚛</span>
-                                    </div>
+                                    <LogoMark className="w-25 h-25" role="img" aria-hidden={false} aria-label="FlotaLaZi" />
                                     <span className="font-black text-7xl tracking-tighter text-white italic">FlotaLaZi</span>
                                 </div>
                             </Link>

@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { type MotionValue, motion, useMotionValueEvent, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import { Check } from 'lucide-react';
+import LogoMark from '../common/LogoMark';
 
 // "Gata de drum": right under the hero, a truck crosses the page as you scroll,
 // passing the ITP / RCA / Rovinietă signs, which turn green as it goes by.
@@ -110,12 +111,11 @@ function TruckDrawing({ wheels }: { wheels: Wheels }) {
             {/* Semi-trailer */}
             <rect x={4} y={8} width={170} height={70} fill="#fff" stroke="#000" strokeWidth={4} />
             <rect x={4} y={8} width={170} height={12} fill="#465fff" stroke="#000" strokeWidth={4} />
-            {/* Panel seams, like a real box trailer, and the logo's small "F" near the front. */}
+            {/* Panel seams, like a real box trailer, and the small logo near the front. */}
             {[38, 72, 106, 140].map((x) => (
                 <line key={x} x1={x} y1={22} x2={x} y2={76} stroke="#000" strokeOpacity={0.18} strokeWidth={3} />
             ))}
-            <rect x={144} y={28} width={22} height={22} fill="#465fff" stroke="#000" strokeWidth={3} />
-            <text x={155} y={45} textAnchor="middle" fontSize={17} fontWeight={900} fontFamily="inherit" fill="#fff">F</text>
+            <LogoMark x={144} y={28} width={22} height={22} />
             {/* Tractor */}
             <path d="M182 84 V36 Q182 26 192 26 H226 Q236 26 242 40 L252 60 V84 Z" fill="#465fff" stroke="#000" strokeWidth={4} strokeLinejoin="round" />
             <path d="M216 33 H227 Q232 33 236 41 L242 54 H216 Z" fill="#c7d2fe" stroke="#000" strokeWidth={3} strokeLinejoin="round" />
